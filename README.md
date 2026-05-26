@@ -39,7 +39,6 @@ A fictional sci-fi marketplace web app with a 3D globe concept.
 - Ethical Hacking
 - Kali Linux
 - Python
-- Scripting
 - HTML
 - CSS
 - Figma
