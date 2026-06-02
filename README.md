@@ -1,14 +1,5 @@
 <div align="center">
 
-```
- ██████╗ ██╗  ██╗ █████╗ ██████╗ ██╗   ██╗ █████╗ 
-██╔══██╗╚██╗██╔╝██╔══██╗██╔══██╗██║   ██║██╔══██╗
-███████║ ╚███╔╝ ███████║██████╔╝██║   ██║███████║
-██╔══██║ ██╔██╗ ██╔══██║██╔══██╗╚██╗ ██╔╝██╔══██║
-██║  ██║██╔╝ ██╗██║  ██║██║  ██║ ╚████╔╝ ██║  ██║
-╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝  ╚═══╝  ╚═╝  ╚═╝
-```
-
 ### `> KULKARNI_ATHARVA.exe — INITIALIZING...`
 
 <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=18&pause=1000&color=00FF41&center=true&vCenter=true&width=500&lines=Cybersecurity+Enthusiast+%F0%9F%94%90;Frontend+Developer+%F0%9F%96%A5%EF%B8%8F;Builder+of+Digital+Experiences+%F0%9F%9A%80;Ethical+Hacker+in+Training+%F0%9F%AA%96" alt="Typing SVG" />
