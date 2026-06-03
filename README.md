@@ -77,6 +77,9 @@ An AI-powered code and pull request review dashboard that leverages Claude engin
 ### KaliCMD
 A sleek black-themed web app to browse, search, and copy all A–Z Kali Linux commands instantly.
 
+### BinRoute
+An AI-powered smart waste management routing system that optimizes garbage collection truck routes, reducing fuel consumption and emissions.
+
 ---
 
 ## `> cat skills.json`
