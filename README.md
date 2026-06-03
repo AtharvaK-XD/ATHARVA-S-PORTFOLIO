@@ -68,6 +68,15 @@ A fictional marketplace wrapped in a 3D interactive globe interface. Sci-fi conc
 </tr>
 </table>
 
+### Hyper Focus
+A cyberpunk-themed Pomodoro timer and task manager designed to eliminate distractions, track focus streaks, and optimize productivity sessions.
+
+### Revvy
+An AI-powered code and pull request review dashboard that leverages Claude engines to automate security auditing and code quality assessments.
+
+### KaliCMD
+A sleek black-themed web app to browse, search, and copy all A–Z Kali Linux commands instantly.
+
 ---
 
 ## `> cat skills.json`
