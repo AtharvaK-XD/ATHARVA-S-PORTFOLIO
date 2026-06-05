@@ -27,7 +27,7 @@ export const content = {
       ]
     },
     about: {
-      text: "Passionate about breaking things ethically and building things intelligently. As a cybersecurity enthusiast, I explore both offensive and defensive security to understand and protect complex digital systems. Python is my weapon of choice for automating tasks and building security tools. Beyond core security, I love expanding my tech horizon through modern frontend web development and crafting intuitive interfaces. My ultimate goal is to become a versatile professional who thinks like an attacker but builds like a defender, and I am always open to new collaborations and learning opportunities."
+      text: "I'm a frontend developer who obsesses over the gap between design and code. I build fast, interactive web experiences using React, Tailwind, and Vite — from hackathon prototypes to production-ready apps. I care deeply about UI details, smooth animations, and interfaces that feel good to use. Currently a CS student, always shipping something new."
     },
     projects: [
       {
