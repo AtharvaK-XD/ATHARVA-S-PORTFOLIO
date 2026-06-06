@@ -26,6 +26,7 @@ export function useMode() {
     setTimeout(() => {
       setMode(nextMode);
       localStorage.setItem('portfolioMode', nextMode);
+      window.scrollTo(0, 0);
     }, 500);
 
     // Let the loader run for some time, then fade the new content in and start fading out loader (1000ms)
