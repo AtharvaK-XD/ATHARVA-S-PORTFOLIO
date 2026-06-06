@@ -1,4 +1,5 @@
 import React from 'react';
+import profileImg from '../assets/profile.jpg';
 
 export default function About({ mode, text, contact }) {
   const isHacker = mode === 'hacker';
@@ -17,11 +18,26 @@ export default function About({ mode, text, contact }) {
           About Me
         </h2>
         <div className="about-grid">
-          <p className="about-text text-[var(--muted)] leading-relaxed">
+          <div className="profile-panel terminal-window zoom-card">
+            <div className="terminal-top">
+              <span></span><span></span><span></span>
+              <p className="font-mono">{isHacker ? "face_scan.bin" : "profile.jpg"}</p>
+            </div>
+            <div className="profile-img-wrap">
+              <img 
+                src={profileImg} 
+                alt="Atharva Kulkarni" 
+                className="profile-img" 
+              />
+            </div>
+          </div>
+
+          <p className="about-text text-[var(--muted)] leading-relaxed zoom-card">
             {text}
           </p>
-          <aside className="info-panel terminal-window">
-            <div class="terminal-top">
+
+          <aside className="info-panel terminal-window zoom-card">
+            <div className="terminal-top">
               <span></span><span></span><span></span>
               <p className="font-mono">identity-dossier.sec</p>
             </div>

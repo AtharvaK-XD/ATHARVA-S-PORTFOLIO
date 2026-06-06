@@ -20,7 +20,7 @@ export default function Blog({ mode, blogs, emptyState }) {
           // Dev Mode / Empty State (Coming Soon Card)
           <div className="mt-8 max-w-xl mx-auto">
             <div 
-              className="project-card flex flex-col justify-center items-center py-12 px-6 text-center border border-[var(--border)] opacity-80"
+              className="project-card zoom-card flex flex-col justify-center items-center py-12 px-6 text-center border border-[var(--border)] opacity-80"
               style={{
                 boxShadow: 'var(--shadow)',
                 background: 'var(--surface)'
@@ -52,7 +52,7 @@ export default function Blog({ mode, blogs, emptyState }) {
                 href={blog.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="project-card block text-left transition-all duration-300 hover:scale-[1.01]"
+                className="project-card zoom-card block text-left transition-all duration-300"
                 style={{
                   boxShadow: 'inset 0 0 0 1px rgba(0, 255, 65, 0.1), 0 0 20px rgba(0, 255, 65, 0.1)',
                   background: 'var(--surface)'

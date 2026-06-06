@@ -212,43 +212,7 @@ export default function App() {
         section.classList.add("scroll-3d");
       });
 
-      if (window.innerWidth > 700) {
-        let focusedSection = null;
-        let minDistance = Number.POSITIVE_INFINITY;
-        const readLine = window.innerHeight * 0.35;
 
-        sections.forEach((section) => {
-          const rect = section.getBoundingClientRect();
-          const relativeCenter = rect.top + (rect.height * 0.4);
-          let distance = Math.abs(readLine - relativeCenter);
-
-          if (section === sections[sections.length - 1]) {
-            const isAtBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 20;
-            if (isAtBottom) distance -= window.innerHeight;
-          }
-
-          if (distance < minDistance) {
-            minDistance = distance;
-            focusedSection = section;
-          }
-        });
-
-        sections.forEach((section) => {
-          let isFocused = section === focusedSection;
-          // Unblur both skill blocks together
-          if (focusedSection && (focusedSection.id === "skills" || focusedSection.id === "soft-skills")) {
-            if (section.id === "skills" || section.id === "soft-skills") {
-              isFocused = true;
-            }
-          }
-          section.classList.toggle("is-focused", isFocused);
-          section.classList.toggle("is-defocused", !isFocused);
-        });
-      } else {
-        sections.forEach((section) => {
-          section.classList.remove("is-focused", "is-defocused");
-        });
-      }
 
       if (bgGradient) {
         bgGradient.style.transform = `translateY(${scrollTop * -0.03}px)`;

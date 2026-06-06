@@ -7,7 +7,7 @@ export default function Hero({ mode, data, glitchActive }) {
   return (
     <section id="hero" className="section hero reveal show">
       <div className="container hero-grid">
-        <div className="hero-copy terminal-window">
+        <div className="hero-copy terminal-window zoom-card">
           <div className="terminal-top">
             <span></span><span></span><span></span>
             <p className="font-mono">{isHacker ? "root@atharva:~$" : "atharva-profile.exe"}</p>
@@ -59,7 +59,7 @@ export default function Hero({ mode, data, glitchActive }) {
           </div>
         </div>
 
-        <aside className="hero-panel terminal-window" aria-label="Quick profile stats">
+        <aside className="hero-panel terminal-window zoom-card" aria-label="Quick profile stats">
           <div className="terminal-top">
             <span></span><span></span><span></span>
             <p className="font-mono">system-metrics.log</p>

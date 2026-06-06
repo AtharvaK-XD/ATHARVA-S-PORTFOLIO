@@ -5,7 +5,7 @@ function ProjectCard({ project, mode }) {
   
   return (
     <a 
-      className="project-card-wrapper"
+      className="project-card-wrapper zoom-card"
       href={project.url}
       target={project.url === '#' ? undefined : "_blank"}
       rel={project.url === '#' ? undefined : "noopener noreferrer"}
