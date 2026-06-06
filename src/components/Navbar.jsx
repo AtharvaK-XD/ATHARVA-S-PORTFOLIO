@@ -1,4 +1,5 @@
 import React from 'react';
+import { Download } from 'lucide-react';
 
 export default function Navbar({ mode, data }) {
   const { logo, links, badge } = data;
@@ -19,21 +20,35 @@ export default function Navbar({ mode, data }) {
             {mode === 'hacker' && <span className="cursor-blink text-[var(--accent)] font-bold">|</span>}
           </span>
         </div>
-        <nav className="nav">
-          {links.map((link) => (
-            <a 
-              key={link.label} 
-              href={link.href}
-              className="text-sm font-semibold hover:text-[var(--accent)] transition-colors duration-200"
-              style={{
-                fontFamily: mode === 'hacker' ? 'var(--mono)' : 'inherit'
-              }}
-            >
-              {link.label}
-            </a>
-          ))}
-        </nav>
+        <div className="flex items-center gap-4">
+          <nav className="nav">
+            {links.map((link) => (
+              <a 
+                key={link.label} 
+                href={link.href}
+                className="text-sm font-semibold hover:text-[var(--accent)] transition-colors duration-200"
+                style={{
+                  fontFamily: mode === 'hacker' ? 'var(--mono)' : 'inherit'
+                }}
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+          <a 
+            href="/Atharva_Kulkarni_Resume.pdf" 
+            download="Atharva_Kulkarni_Resume.pdf"
+            className="resume-btn"
+            style={{
+              fontFamily: mode === 'hacker' ? 'var(--mono)' : 'inherit'
+            }}
+          >
+            <Download size={14} className="mr-1.5" />
+            <span>{mode === 'hacker' ? 'resume.sh' : 'Resume'}</span>
+          </a>
+        </div>
       </div>
     </header>
   );
 }
+
