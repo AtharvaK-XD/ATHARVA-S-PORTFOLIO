@@ -45,7 +45,7 @@ function ProjectCard({ project, mode }) {
           <p className="text-sm leading-relaxed mt-2.5 flex-grow">{project.description}</p>
           
           <div className="mt-auto pt-4">
-            <span className="card-btn">Open Project</span>
+            <span className="card-btn">{project.btnText || "Open Project"}</span>
           </div>
         </div>
 
@@ -75,7 +75,7 @@ function ProjectCard({ project, mode }) {
           </p>
           
           <div className="mt-auto pt-4">
-            <span className="card-btn">Open Project</span>
+            <span className="card-btn">{project.btnText || "Open Project"}</span>
           </div>
         </div>
       </div>

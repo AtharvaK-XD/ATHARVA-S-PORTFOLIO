@@ -91,7 +91,8 @@ export const content = {
         description: "Peer-to-peer rental marketplace for campus communities.",
         detailedDescription: "CampusRent is a peer-to-peer campus marketplace designed for college students to safely lend and borrow equipment, textbooks, and tools. Built using React, Zustand, and Tailwind, it features a reverse auction pricing mechanism where borrowers bid and lenders choose the best offer. It includes tailored lender/borrower dashboard views, custom hourly rental windows, real-time Socket.io notification updates, and secure campus-only email domain authentication to ensure community safety.",
         url: "https://github.com/AtharvaK-XD/CampusRent",
-        image: campusrentImg
+        image: campusrentImg,
+        btnText: "Open Repository"
       }
     ],
     techSkills: [
