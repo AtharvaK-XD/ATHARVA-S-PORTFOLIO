@@ -196,7 +196,17 @@ export const content = {
       "Emotional Intelligence",
       "Decision-Making"
     ],
-    blogs: [],
+    blogs: [
+      {
+        id: "01",
+        tag: "Automation",
+        title: "I Built an AI-Powered Q&A Chatbot — Without Writing a Single Line of Code",
+        description: "A step-by-step walkthrough of building a fully functional intelligent chatbot using n8n and Google Gemini, complete with auto-tagging pipelines and semantic search capabilities.",
+        date: "JUNE 2026",
+        readTime: "8 MIN READ",
+        url: "https://n8nwriteup.netlify.app/"
+      }
+    ],
     emptyState: {
       title: "Write-ups coming soon",
       subtitle: "Documenting CTF walkthroughs, penetration tests, and security research."

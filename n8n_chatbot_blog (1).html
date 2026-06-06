@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build an AI-Powered Q&A Chatbot — Without Writing a Single Line of Code</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&family=Syne:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #00ff41;
+    --green-dim: #00cc33;
+    --green-dark: #007a1f;
+    --green-faint: rgba(0,255,65,0.06);
+    --bg: #000000;
+    --bg2: #050505;
+    --panel: rgba(0,255,65,0.05);
+    --border: rgba(0,255,65,0.15);
+    --border-hi: rgba(0,255,65,0.4);
+    --text: #cce8d5;
+    --text-dim: #7aad8a;
+    --text-muted: #3a6b4a;
+    --amber: #ffb800;
+    --amber-faint: rgba(255,184,0,0.08);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: #000000;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    line-height: 1.85;
+    min-height: 100vh;
+  }
+
+  /* ── Matrix rain ── */
+  #rain { position: fixed; top:0; left:0; width:100%; height:100%; z-index:0; opacity:0.06; pointer-events:none; }
+
+  /* ── Layout ── */
+  .page { position: relative; z-index: 1; }
+
+  /* ── Top bar ── */
+  .topbar {
+    border-bottom: 0.5px solid var(--border);
+    padding: 14px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+  }
+  .topbar-logo { color: var(--green); font-weight: 700; }
+  .topbar-right { display: flex; gap: 24px; }
+
+  /* ── Article container ── */
+  .article {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 60px 32px 100px;
+  }
+
+  /* ── Breadcrumb ── */
+  .breadcrumb {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 1.5px;
+    margin-bottom: 32px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .breadcrumb span { color: var(--green-dark); }
+
+  /* ── Tags ── */
+  .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+  .tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    padding: 4px 10px;
+    border: 0.5px solid var(--border-hi);
+    color: var(--green-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .tag.amber { border-color: rgba(255,184,0,0.5); color: var(--amber); }
+
+  /* ── Title ── */
+  .article-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(22px, 3.5vw, 36px);
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
+  }
+  .article-title em { color: var(--green); font-style: normal; }
+
+  /* ── Meta ── */
+  .article-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 0.5px solid var(--border);
+    letter-spacing: 1px;
+  }
+  .meta-dot { width: 3px; height: 3px; background: var(--green-dark); border-radius: 50%; }
+
+  /* ── Lead ── */
+  .lead {
+    font-size: 20px;
+    font-weight: 300;
+    color: var(--text);
+    line-height: 1.7;
+    margin-bottom: 40px;
+    border-left: 2px solid var(--green-dark);
+    padding-left: 20px;
+  }
+
+  /* ── Body prose ── */
+  p { color: var(--text-dim); font-weight: 400; margin-bottom: 20px; }
+  strong { color: var(--text); font-weight: 600; }
+
+  /* ── Section headings ── */
+  h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin: 48px 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2::before { content: '//'; color: var(--green-dark); font-weight: 400; }
+
+  h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 28px 0 10px;
+  }
+
+  /* ── Callout box ── */
+  .callout {
+    border: 0.5px solid var(--border-hi);
+    background: var(--panel);
+    padding: 20px 24px;
+    margin: 28px 0;
+    position: relative;
+  }
+  .callout::before {
+    content: attr(data-label);
+    position: absolute;
+    top: -9px; left: 16px;
+    background: #000000;
+    padding: 0 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--green-dark);
+  }
+  .callout p { color: var(--text-dim); margin: 0; font-size: 15px; line-height: 1.7; }
+  .callout.warn { border-color: rgba(255,184,0,0.3); background: var(--amber-faint); }
+  .callout.warn::before { color: rgba(255,184,0,0.5); }
+  .callout.warn p { color: #b08040; }
+
+  /* ── Step list ── */
+  .steps { list-style: none; margin: 20px 0 28px; display: flex; flex-direction: column; gap: 0; }
+  .steps li {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 0 16px;
+    padding-bottom: 24px;
+    position: relative;
+  }
+  .steps li::after {
+    content: '';
+    position: absolute;
+    left: 19px; top: 36px; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--green-dark), transparent);
+  }
+  .steps li:last-child::after { display: none; }
+  .steps li:last-child { padding-bottom: 0; }
+
+  .step-n {
+    width: 36px; height: 36px;
+    border: 1px solid var(--green-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--green);
+    flex-shrink: 0;
+  }
+  .step-text { padding-top: 6px; }
+  .step-text strong { display: block; font-size: 14px; font-weight: 600; color: var(--green-dim); margin-bottom: 4px; letter-spacing: 0.5px; font-family: 'Share Tech Mono', monospace; }
+  .step-text p { font-size: 15px; margin: 0; color: var(--text-dim); }
+
+  /* ── Code block ── */
+  .code-wrap {
+    background: #080808;
+    border: 0.5px solid var(--border);
+    border-left: 2px solid var(--green-dark);
+    padding: 20px 24px;
+    margin: 24px 0;
+    position: relative;
+    overflow-x: auto;
+  }
+  .code-wrap .clabel {
+    position: absolute; top: -9px; right: 14px;
+    background: #000000;
+    padding: 0 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--text-muted);
+    letter-spacing: 1.5px;
+  }
+  .code-wrap pre {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: var(--green-dim);
+    line-height: 1.85;
+    white-space: pre;
+    margin: 0;
+  }
+  .kw { color: #569cd6; }
+  .cm { color: var(--text-muted); font-style: italic; }
+  .st { color: #ce9178; }
+  .am { color: var(--amber); }
+
+  /* ── Prompt block ── */
+  .prompt {
+    background: #080808;
+    border: 0.5px solid rgba(255,184,0,0.25);
+    border-left: 2px solid var(--amber);
+    padding: 20px 24px;
+    margin: 24px 0;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: #b08040;
+    line-height: 1.9;
+    white-space: pre-wrap;
+    position: relative;
+  }
+  .prompt .plabel {
+    position: absolute; top: -9px; right: 14px;
+    background: #000000;
+    padding: 0 8px;
+    font-size: 9px;
+    color: rgba(255,184,0,0.4);
+    letter-spacing: 1.5px;
+  }
+
+  /* ── Example queries ── */
+  .queries { list-style: none; margin: 16px 0 24px; display: flex; flex-direction: column; gap: 8px; }
+  .queries li {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: var(--text-dim);
+    padding: 9px 14px;
+    border: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .queries li:hover { border-color: var(--border-hi); color: var(--green); cursor: default; }
+  .queries li::before { content: '>'; color: var(--green-dark); flex-shrink: 0; }
+
+  /* ── Divider ── */
+  .rule {
+    display: flex; align-items: center; gap: 12px;
+    margin: 40px 0;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+  }
+  .rule::before, .rule::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
+
+  /* ── Footer ── */
+  .article-footer {
+    margin-top: 60px;
+    padding-top: 32px;
+    border-top: 0.5px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .footer-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+  .footer-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+  }
+  .footer-tag::before { content: '#'; color: var(--green-dark); }
+  .footer-nav {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-align: right;
+  }
+  .footer-nav a { color: var(--text-muted); text-decoration: none; }
+  .footer-nav a:hover { color: var(--green); }
+
+  /* ── Cursor blink ── */
+  .cur { display: inline-block; width: 8px; height: 16px; background: var(--green); vertical-align: middle; animation: blink 1s step-end infinite; margin-left: 2px; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: #000000; }
+  ::-webkit-scrollbar-thumb { background: var(--green-dark); }
+
+  /* ── Demo button ── */
+  .demo-btn-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin: 28px 0 0;
+    padding: 48px 32px;
+    border: 0.5px solid var(--border);
+    background: var(--green-faint);
+  }
+  .demo-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .demo-btn-glow {
+    position: absolute;
+    inset: -2px;
+    background: var(--green);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .demo-btn:hover .demo-btn-glow { opacity: 0.12; }
+  .demo-btn-inner {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #000;
+    background: var(--green);
+    padding: 18px 44px;
+    transition: transform 0.15s, background 0.2s;
+    white-space: nowrap;
+  }
+  .demo-btn:hover .demo-btn-inner {
+    background: #00e639;
+    transform: translateY(-2px);
+  }
+  .demo-btn:active .demo-btn-inner { transform: translateY(0); }
+  .demo-btn-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="rain"></canvas>
+
+<div class="page">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <span class="topbar-logo">DEV.WRITEUPS</span>
+    <div class="topbar-right">
+      <span>TUTORIALS</span>
+      <span>N8N</span>
+      <span>AI AGENTS</span>
+    </div>
+  </div>
+
+  <!-- Article -->
+  <article class="article">
+
+    <div class="breadcrumb">
+      WRITE-UPS <span>/</span> AUTOMATION <span>/</span> N8N
+    </div>
+
+    <div class="tag-row">
+      <span class="tag amber">🚀 No-Code Build</span>
+      <span class="tag">n8n</span>
+      <span class="tag">Google Gemini</span>
+      <span class="tag">AI Agent</span>
+      <span class="tag">Automation</span>
+    </div>
+
+    <h1 class="article-title">
+      I Built an <em>AI-Powered Q&A Chatbot</em><br>— Without Writing a Single Line of Code<span class="cur"></span>
+    </h1>
+
+    <div class="article-meta">
+      <span>JUNE 2026</span>
+      <span class="meta-dot"></span>
+      <span>8 MIN READ</span>
+      <span class="meta-dot"></span>
+      <span>BEGINNER FRIENDLY</span>
+      <span class="meta-dot"></span>
+      <span>#BUILDINPUBLIC</span>
+    </div>
+
+    <p class="lead">
+      Over the past few days, I put together a fully functional intelligent chatbot using n8n and Google Gemini — and honestly, I'm blown away by how much you can build with no-code automation tools today. Here's exactly how I did it.
+    </p>
+
+    <!-- ── What We're Building ── -->
+    <h2>What We're Building</h2>
+
+    <p>The end result is a chatbot that <strong>searches a custom Q&A knowledge base</strong>, synthesizes relevant entries using Gemini, and remembers the context of your conversation — all without any external database or backend server. Everything runs inside n8n.</p>
+
+    <div class="callout" data-label="OVERVIEW">
+      <p>A user sends a message → the AI Agent (Gemini) receives it → searches an n8n data sheet using two custom tools → synthesizes a natural answer → Simple Memory keeps context across the whole conversation.</p>
+    </div>
+
+    <p>There's also a <strong>second workflow</strong> that auto-tags every new Q&A entry using Gemini before saving it to the data sheet — so the knowledge base grows smarter over time, automatically.</p>
+
+    <!-- ── How It Works ── -->
+    <h2>How It Works — Step by Step</h2>
+
+    <p>The main chatbot workflow has five stages. Here's each one broken down:</p>
+
+    <ul class="steps">
+      <li>
+        <div class="step-n">01</div>
+        <div class="step-text">
+          <strong>USER SENDS A MESSAGE</strong>
+          <p>The user types a question into the chat interface exposed by n8n's Webhook trigger node. No frontend framework, no custom server.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-n">02</div>
+        <div class="step-text">
+          <strong>AI AGENT RECEIVES IT</strong>
+          <p>The AI Agent node — powered by Google Gemini — receives the question and decides which custom tool to invoke based on what's being asked.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-n">03</div>
+        <div class="step-text">
+          <strong>SEARCHES THE DATA SHEET</strong>
+          <p>Two custom tools are wired up: one matches the question column directly, another searches by AI-generated semantic tags. Both query the n8n data sheet that acts as our knowledge base.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-n">04</div>
+        <div class="step-text">
+          <strong>SYNTHESIZES & RESPONDS</strong>
+          <p>Gemini synthesizes the retrieved entries into a natural language answer. The Simple Memory node keeps context across the full conversation thread, so the bot remembers prior turns.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-n">05</div>
+        <div class="step-text">
+          <strong>KNOWLEDGE BASE GROWS</strong>
+          <p>A second workflow auto-tags every new Q&A submission using Gemini before inserting it into the data sheet. No manual curation — the knowledge base improves itself.</p>
+        </div>
+      </li>
+    </ul>
+
+    <!-- ── The Two Custom Tools ── -->
+    <h2>The Two Custom Tools</h2>
+
+    <p>The most important design decision in this whole build is having <strong>two separate search tools</strong> rather than one. Here's why it matters:</p>
+
+    <h3>Tool 1 — Direct Question Match</h3>
+    <p>This tool does a straightforward lookup against the "question" column of the data sheet. It works perfectly when the user's phrasing closely matches how the Q&A was written. Fast, precise, low-cost.</p>
+
+    <h3>Tool 2 — Tag-Based Semantic Search</h3>
+    <p>This one searches by the AI-generated tags attached to each entry. It's what saves you when the user asks something phrased differently from the stored question. For example: "What did Einstein invent?" might not match a row titled "Albert Einstein's contributions to physics" — but the tags will bridge it.</p>
+
+    <div class="callout" data-label="WHY BOTH?">
+      <p>Tool 1 gives precision. Tool 2 gives recall. Together, the agent can handle both exact lookups and loosely-worded natural questions without hallucinating answers it doesn't have.</p>
+    </div>
+
+    <!-- ── Auto-Tagging Pipeline ── -->
+    <h2>Auto-Tagging Pipeline (Workflow 2)</h2>
+
+    <p>This is the part that makes the system compound over time. Every time a new Q&A is submitted via the web form, a second n8n workflow triggers automatically:</p>
+
+    <div class="code-wrap">
+      <span class="clabel">FLOW LOGIC</span>
+      <pre><span class="cm"># Workflow 2 — Auto-tag on form submission</span>
+
+<span class="kw">1.</span> Form submission received (Webhook trigger)
+<span class="kw">2.</span> IF node → checks if entry already exists in sheet
+<span class="kw">3.</span> Gemini node → generate <span class="am">3–5 semantic tags</span> for the Q&A
+<span class="kw">4.</span> n8n Data Sheet → insert new row with tags attached</pre>
+    </div>
+
+    <p>The tags Gemini generates are what powers Tool 2's search capability. Over time, as your team adds more entries, the coverage widens and the bot handles increasingly complex questions correctly.</p>
+
+    <!-- ── System Prompt ── -->
+    <h2>The System Prompt That Matters</h2>
+
+    <p>This is the piece most tutorials skip — and it's the one that causes the most bugs. A weak system prompt lets the agent fall back on Gemini's general knowledge when no tool result is found, producing confident-sounding but completely fabricated answers.</p>
+
+    <p>Here's the strict prompt I used:</p>
+
+    <div class="prompt">
+      <span class="plabel">SYSTEM PROMPT</span>You are a Q&A assistant with access to a knowledge base.
+
+ONLY answer questions using information retrieved from your tools.
+If no relevant entry is found, respond:
+"I don't have that in my knowledge base yet."
+
+Do NOT use your general training knowledge to answer.
+Tool results only. Always cite which entry you used.</div>
+
+    <div class="callout warn" data-label="⚠ COMMON MISTAKE">
+      <p>If you leave out the "tool results only" constraint, Gemini will silently start answering from its own training data when searches return nothing. This breaks the entire point of having a curated knowledge base — and you won't know it's happening.</p>
+    </div>
+
+    <!-- ── Try It ── -->
+    <h2>Test Queries to Try</h2>
+
+    <p>Once you've seeded your data sheet with some Q&A entries, these are good starting queries to test all the edge cases:</p>
+
+    <ul class="queries">
+      <li>Who painted the Mona Lisa?</li>
+      <li>What is the speed of light in a vacuum?</li>
+      <li>Which planet has the most moons?</li>
+      <li>What is the only food that never spoils?</li>
+      <li>What programming language did Guido van Rossum create?</li>
+    </ul>
+
+    <p>The first three test direct-match recall. The last two are phrased more loosely and will exercise the tag-based tool. If both return correct answers, your setup is solid.</p>
+
+    <!-- ── Live Demo Button ── -->
+    <div class="rule">TRY IT LIVE</div>
+
+    <div class="demo-btn-wrap">
+      <a class="demo-btn" href="https://atharva30111.app.n8n.cloud/webhook/6b70e3c1-4af3-494e-a4bb-a89ecd14ca02/chat" target="_blank" rel="noopener">
+        <span class="demo-btn-glow"></span>
+        <span class="demo-btn-inner">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          TRY THE LIVE CHATBOT
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M7 7h10v10"/></svg>
+        </span>
+      </a>
+      <div class="demo-btn-sub">Powered by n8n &amp; Google Gemini · No login required</div>
+    </div>
+
+    <!-- ── Footer ── -->
+    <footer class="article-footer">
+      <div class="footer-tags">
+        <span class="footer-tag">n8n</span>
+        <span class="footer-tag">AIAgent</span>
+        <span class="footer-tag">NoCode</span>
+        <span class="footer-tag">Automation</span>
+        <span class="footer-tag">GoogleGemini</span>
+        <span class="footer-tag">BuildInPublic</span>
+        <span class="footer-tag">MachineLearning</span>
+        <span class="footer-tag">WorkflowAutomation</span>
+      </div>
+      <div class="footer-nav">
+        <span>← PREV: PICKMYSPOT APK</span>
+        <a href="#">NEXT: CODEREVIEW AI →</a>
+      </div>
+    </footer>
+
+  </article>
+</div>
+
+<script>
+const c = document.getElementById('rain');
+const cx = c.getContext('2d');
+function sz() { c.width = window.innerWidth; c.height = window.innerHeight; }
+sz(); window.addEventListener('resize', sz);
+const ch = 'アイウエオカキクケコサシスセソタチツテトABCDEFGHIJKLMNOP0123456789@#$%&';
+const fs = 13;
+let cols = Math.floor(c.width / fs);
+let dr = Array(cols).fill(0).map(() => Math.random() * -60);
+function draw() {
+  cx.fillStyle = 'rgba(0,0,0,0.08)';
+  cx.fillRect(0, 0, c.width, c.height);
+  cx.fillStyle = '#00ff41';
+  cx.font = fs + 'px Share Tech Mono, monospace';
+  for (let i = 0; i < dr.length; i++) {
+    cx.globalAlpha = Math.random() * 0.25 + 0.05;
+    cx.fillText(ch[Math.floor(Math.random() * ch.length)], i * fs, dr[i] * fs);
+    if (dr[i] * fs > c.height && Math.random() > 0.975) dr[i] = 0;
+    dr[i]++;
+  }
+  cx.globalAlpha = 1;
+}
+setInterval(draw, 90);
+</script>
+</body>
+</html>

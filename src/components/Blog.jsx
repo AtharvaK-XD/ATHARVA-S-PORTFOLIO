@@ -50,6 +50,8 @@ export default function Blog({ mode, blogs, emptyState }) {
               <a
                 key={blog.id}
                 href={blog.url}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="project-card block text-left transition-all duration-300 hover:scale-[1.01]"
                 style={{
                   boxShadow: 'inset 0 0 0 1px rgba(0, 255, 65, 0.1), 0 0 20px rgba(0, 255, 65, 0.1)',
@@ -93,7 +95,7 @@ export default function Blog({ mode, blogs, emptyState }) {
                 </div>
 
                 <div className="mt-4 flex items-center justify-between text-xs text-[var(--accent)] font-semibold font-mono tracking-wider uppercase">
-                  <span>Read Writeup</span>
+                  <span>Open Blog</span>
                   <span>→</span>
                 </div>
               </a>
