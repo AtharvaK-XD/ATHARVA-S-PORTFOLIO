@@ -8,38 +8,45 @@ export function useMode() {
   const [contentVisible, setContentVisible] = useState(true);
   const [scanlineActive, setScanlineActive] = useState(false);
   const [glitchActive, setGlitchActive] = useState(false);
+  const [transitionTarget, setTransitionTarget] = useState(null);
+  const [transitionFadeOut, setTransitionFadeOut] = useState(false);
 
   const triggerModeSwitch = () => {
     if (isTransitioning) return;
 
+    const nextMode = mode === 'dev' ? 'hacker' : 'dev';
+    setTransitionTarget(nextMode);
     setIsTransitioning(true);
     setScanlineActive(true);
+    setTransitionFadeOut(false);
 
-    // Overlay fades in (150ms). After it's fully faded in, we start fading out the content.
-    setTimeout(() => {
-      setContentVisible(false);
-    }, 150);
+    setContentVisible(false);
 
-    // After content has faded out completely (300ms total from start), we update the mode,
-    // fade the new content in, and trigger the hero title glitch animation.
+    // After content is hidden, perform the switch in background but keep loader active
     setTimeout(() => {
-      const nextMode = mode === 'dev' ? 'hacker' : 'dev';
       setMode(nextMode);
       localStorage.setItem('portfolioMode', nextMode);
+    }, 500);
+
+    // Let the loader run for some time, then fade the new content in and start fading out loader (1000ms)
+    setTimeout(() => {
       setContentVisible(true);
       setGlitchActive(true);
-    }, 300);
+      setTransitionFadeOut(true);
+    }, 1000);
 
-    // Disable scanline sweep after it completes (400ms).
+    // Disable scanline sweep after it completes (1100ms).
     setTimeout(() => {
       setScanlineActive(false);
-    }, 400);
+    }, 1100);
 
-    // Jitter animation finishes after 300ms (600ms total since click). Fade out overlay and end transition.
+    // End transition (1400ms). Fade out overlay and reset target.
     setTimeout(() => {
       setGlitchActive(false);
       setIsTransitioning(false);
-    }, 600);
+      setTransitionTarget(null);
+      setTransitionFadeOut(false);
+    }, 1400);
   };
 
   return {
@@ -48,6 +55,8 @@ export function useMode() {
     contentVisible,
     scanlineActive,
     glitchActive,
+    transitionTarget,
+    transitionFadeOut,
     triggerModeSwitch
   };
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useMode } from './hooks/useMode';
 import { content } from './content';
 import Navbar from './components/Navbar';
@@ -10,6 +10,7 @@ import Blog from './components/Blog';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import ModeToggle from './components/ModeToggle';
+import { InitialLoader, TransitionLoader } from './components/Loader';
 
 import './styles/transitions.css';
 
@@ -20,11 +21,46 @@ export default function App() {
     contentVisible,
     scanlineActive,
     glitchActive,
+    transitionTarget,
+    transitionFadeOut,
     triggerModeSwitch
   } = useMode();
 
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [loaderFadeOut, setLoaderFadeOut] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+
   const canvasRef = useRef(null);
   const data = content[mode];
+
+  // Initial loading progress simulator
+  useEffect(() => {
+    const duration = 1800; // 1.8 seconds
+    const intervalTime = 30;
+    const steps = duration / intervalTime;
+    let currentStep = 0;
+
+    const timer = setInterval(() => {
+      currentStep++;
+      const progress = Math.min(Math.round((currentStep / steps) * 100), 100);
+      setLoadingProgress(progress);
+
+      if (currentStep >= steps) {
+        clearInterval(timer);
+        // Wait 400ms (showing 100%), then start fade-out
+        setTimeout(() => {
+          setLoaderFadeOut(true);
+        }, 400);
+
+        // Wait 900ms (400ms hold + 500ms transition), then unmount loader
+        setTimeout(() => {
+          setInitialLoading(false);
+        }, 900);
+      }
+    }, intervalTime);
+
+    return () => clearInterval(timer);
+  }, []);
 
   // 1. Sync data-mode and cursor-crosshair class to document/body
   useEffect(() => {
@@ -282,11 +318,13 @@ export default function App() {
         )}
       </div>
 
+      {/* Mode Switch Transition Loader */}
+      {isTransitioning && transitionTarget && (
+        <TransitionLoader targetMode={transitionTarget} fadeOut={transitionFadeOut} />
+      )}
+
       {/* Main Content wrapper with dynamic fade transition */}
-      <div 
-        className="transition-opacity duration-200"
-        style={{ opacity: contentVisible ? 1 : 0 }}
-      >
+      <div className={`page-content-fade ${contentVisible ? 'visible' : ''}`}>
         <Navbar mode={mode} data={data.navbar} />
         
         <main>
@@ -303,6 +341,11 @@ export default function App() {
 
       {/* Floating Identity Switcher */}
       <ModeToggle mode={mode} onToggle={triggerModeSwitch} />
+
+      {/* Initial Page Loader overlay */}
+      {initialLoading && (
+        <InitialLoader mode={mode} progress={loadingProgress} fadeOut={loaderFadeOut} />
+      )}
     </>
   );
 }
