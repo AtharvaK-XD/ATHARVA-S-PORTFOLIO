@@ -1,3 +1,12 @@
+import pickmyspotImg from './assets/pickmyspot.png';
+import geovaultImg from './assets/geovault.png';
+import hyperfocusImg from './assets/hyperfocus.png';
+import revvyImg from './assets/revvy.png';
+import binrouteImg from './assets/binroute.png';
+import campusrentImg from './assets/campusrent.png';
+import rootlockImg from './assets/rootlock.png';
+import kalicmdImg from './assets/kalicmd.png';
+
 export const content = {
   dev: {
     navbar: {
@@ -34,43 +43,55 @@ export const content = {
         id: "01",
         status: "live",
         title: "PickMySpot",
-        description: "A smart app that helps users easily find, book, and manage seats in real time across places like libraries, offices, and events.",
-        url: "https://pickmyspot.netlify.app"
+        description: "Real-time smart seat booking and allocation system.",
+        detailedDescription: "PickMySpot is a smart Android and web seat-booking platform designed for educational institutions to modernise attendance and seat allocation. Built around an interactive real-time visual seating layout, it allows students to book specific seats for scheduled lectures in advance, promoting responsibility and academic growth. Features include complete student profile lookup per seat (name, roll number, contact info), real-time seat status tracking (occupied vs. available), multi-lecture booking scheduling, and a facility damage reporting system for prompt maintenance.",
+        url: "https://pickmyspot.netlify.app",
+        image: pickmyspotImg
       },
       {
         id: "02",
         status: "stable",
         title: "GeoVault",
-        description: "A fictional sci-fi web app where you can buy entire countries, featuring a stunning 3D globe and a slick marketplace UI.",
-        url: "https://geovault.netlify.app"
+        description: "3D globe marketplace for sovereign land acquisitions.",
+        detailedDescription: "GeoVault is an immersive orbital marketplace and cataloging platform for fictional sovereign acquisitions. Built with a responsive 3D interactive virtual globe that represents territories dynamically, it enables users to buy entire countries. Features include detailed listings of countries complete with populations, capitals, and total market cap statistics, a dynamic real-time shopping cart system to process acquisitions, and filter tools to explore countries by continents (Asia, Europe, Africa, Americas, Oceania).",
+        url: "https://geovault.netlify.app",
+        image: geovaultImg
       },
       {
         id: "03",
         status: "active",
         title: "Hyper Focus",
-        description: "A cyberpunk-themed Pomodoro timer and task manager designed to eliminate distractions, track focus streaks, and optimize productivity sessions.",
-        url: "https://hyper-focus-omega.vercel.app/"
+        description: "Cyberpunk Pomodoro timer and task manager.",
+        detailedDescription: "Hyper Focus is a cyberpunk-themed productivity cockpit and task manager designed to eliminate digital distractions and optimize deep work. It features a customizable countdown timer (Pomodoro framework) with smooth pulsing animations, integrated wellness preferences, and a Session Archive that monitors focus streaks and daily quotas. It includes an in-app Spotify player shortcut for study tracks, a Signal Log for tracking task interference, and a Task Nexus board to organize, queue, and complete work.",
+        url: "https://hyper-focus-omega.vercel.app/",
+        image: hyperfocusImg
       },
       {
         id: "04",
         status: "stable",
         title: "Revvy",
-        description: "An AI-powered code and pull request review dashboard that leverages Claude engines to automate security auditing and code quality assessments.",
-        url: "https://revvy-iota.vercel.app/"
+        description: "AI-powered automated code review and security auditing cockpit.",
+        detailedDescription: "Revvy is a security-first dark IDE code review cockpit and PR auditing dashboard that automates code analysis. Powered by Claude engines, it performs deep security checks, bug detection, style compliance checks, and performance reviews. It features a Review Cockpit displaying average quality scores, PR approval metrics, and critical issue tallies. The platform includes an interactive workspace explorer, an active file review editor, and a live review feed highlighting vulnerability severities.",
+        url: "https://revvy-iota.vercel.app/",
+        image: revvyImg
       },
       {
         id: "05",
         status: "stable",
         title: "BinRoute",
-        description: "An AI-powered smart waste management routing system that optimizes garbage collection truck routes, reducing fuel consumption and emissions.",
-        url: "https://bin-route.vercel.app/"
+        description: "AI-powered municipal waste routing and fleet optimizer.",
+        detailedDescription: "BinRoute is an AI-powered smart waste management dashboard and route optimization system designed to optimize municipal garbage collection. It integrates a live MapBox interactive fleet map showing truck locations and status across districts (like Mumbai). Features include live routing logs tracking truck delay times (such as traffic bottlenecks) and container overflow warnings, real-time analytics dashboards reporting route efficiencies, and automated rescheduling tools to minimize fuel and emission footprints.",
+        url: "https://bin-route.vercel.app/",
+        image: binrouteImg
       },
       {
         id: "06",
         status: "active",
         title: "CampusRent",
-        description: "A peer-to-peer rental marketplace built for college life, connecting students to safely rent or borrow items like textbooks, cameras, and tools within their campus community.",
-        url: "https://github.com/AtharvaK-XD/CampusRent"
+        description: "Peer-to-peer rental marketplace for campus communities.",
+        detailedDescription: "CampusRent is a peer-to-peer campus marketplace designed for college students to safely lend and borrow equipment, textbooks, and tools. Built using React, Zustand, and Tailwind, it features a reverse auction pricing mechanism where borrowers bid and lenders choose the best offer. It includes tailored lender/borrower dashboard views, custom hourly rental windows, real-time Socket.io notification updates, and secure campus-only email domain authentication to ensure community safety.",
+        url: "https://github.com/AtharvaK-XD/CampusRent",
+        image: campusrentImg
       }
     ],
     techSkills: [
@@ -149,15 +170,19 @@ export const content = {
         id: "01",
         status: "tool",
         title: "Rootlock",
-        description: "A password strength analyzer that calculates crack time estimates using entropy-based scoring. Built to understand how attackers evaluate weak credentials.",
-        url: "https://rootlock.netlify.app"
+        description: "Password strength analyzer with entropy-based scoring.",
+        detailedDescription: "Rootlock is a terminal-themed password strength analyzer and security evaluation tool (Protocol v2.0). It features a real-time breach simulation engine that estimates password crack times, a visual entropy circular LED gauge that displays bitwise entropy levels, password feedback with security alerts/suggestions to fix vulnerabilities, a secure key generator to create strong passphrases, and a quick copy-to-clipboard action.",
+        url: "https://rootlock.netlify.app",
+        image: rootlockImg
       },
       {
         id: "02",
         status: "tool",
         title: "KaliCMD",
-        description: "A full A–Z reference for Kali Linux commands. Built for pentesters who need a fast lookup without leaving the browser.",
-        url: "https://kalicmd.netlify.app/"
+        description: "A-Z reference directory for Kali Linux commands.",
+        detailedDescription: "KaliCMD is an A-Z commands directory and reference index designed for penetration testers and security researchers. It houses an index of 256 Kali Linux commands organized across 24 lettered dropdown sections. It features real-time search with keyword matching across command names and descriptions, quick lettered anchor navigation bar, keyboard hotkey triggers (like pressing '/' to search and 'Esc' to clear), and one-click copy buttons to copy commands instantly.",
+        url: "https://kalicmd.netlify.app/",
+        image: kalicmdImg
       }
     ],
     techSkills: [

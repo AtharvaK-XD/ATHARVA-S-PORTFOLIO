@@ -536,6 +536,78 @@ html[data-mode="hacker"] .btn {
   box-shadow: 0 8px 24px var(--glow);
 }
 
+/* 3D Flipping Card Styles */
+.project-card-wrapper {
+  perspective: 1200px;
+  width: 100%;
+  height: 460px;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 250ms ease;
+}
+
+.project-card-wrapper:hover {
+  transform: translateY(-4px);
+}
+
+html[data-mode="hacker"] .project-card-wrapper {
+  height: 460px;
+}
+
+@media (max-width: 960px) {
+  .project-card-wrapper {
+    height: 460px;
+  }
+  html[data-mode="hacker"] .project-card-wrapper {
+    height: 460px;
+  }
+}
+
+@media (max-width: 520px) {
+  .project-card-wrapper {
+    height: 520px;
+  }
+  html[data-mode="hacker"] .project-card-wrapper {
+    height: 520px;
+  }
+}
+
+.project-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.project-card-wrapper:hover .project-card-inner {
+  transform: rotateY(180deg);
+}
+
+.project-card-front,
+.project-card-back {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.project-card-back {
+  transform: rotateY(180deg);
+  background: color-mix(in srgb, var(--surface-strong) 95%, transparent);
+}
+
 .node-state {
   position: absolute;
   top: 0.9rem;
@@ -557,14 +629,36 @@ html[data-mode="hacker"] .btn {
   font-size: 0.78rem;
 }
 
-.project-card h3 {
+.project-card h3,
+.project-card-front h3,
+.project-card-back h3 {
   margin-top: 0.55rem;
 }
 
-.project-card p {
+.project-card p,
+.project-card-front p,
+.project-card-back p {
   margin-top: 0.65rem;
   color: var(--muted);
   line-height: 1.55;
+}
+
+.project-card-back p {
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.project-card-back p::-webkit-scrollbar {
+  width: 4px;
+}
+
+.project-card-back p::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.project-card-back p::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 99px;
 }
 
 .card-btn {
@@ -577,17 +671,17 @@ html[data-mode="hacker"] .btn {
   font-weight: 700;
 }
 
-html[data-mode="hacker"] .project-card::after {
+html[data-mode="hacker"] .project-card::after,
+html[data-mode="hacker"] .project-card-front::after,
+html[data-mode="hacker"] .project-card-back::after {
   content: "ACCESS POINT";
   position: absolute;
-  top: 0.8rem;
-  right: 0.8rem;
   font-size: 0.66rem;
   font-family: var(--mono);
   color: var(--accent-2);
   opacity: 0.75;
-  top: auto;
   bottom: 0.8rem;
+  right: 0.8rem;
 }
 
 .skills-wrap {
@@ -737,6 +831,8 @@ html[data-mode="hacker"] .hero-panel,
 html[data-mode="hacker"] .info-panel,
 html[data-mode="hacker"] .about-text,
 html[data-mode="hacker"] .project-card,
+html[data-mode="hacker"] .project-card-front,
+html[data-mode="hacker"] .project-card-back,
 html[data-mode="hacker"] .skill-chip {
   box-shadow: inset 0 0 0 1px rgba(24, 255, 140, 0.2), 0 0 26px rgba(24, 255, 140, 0.14);
 }
