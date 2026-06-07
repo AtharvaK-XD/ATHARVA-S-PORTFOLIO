@@ -1,5 +1,7 @@
 import React from 'react';
 import profileImg from '../assets/profile.jpg';
+import profileDevImg from '../assets/profile_dev.png';
+import profileHackerImg from '../assets/profile_hacker.png';
 
 export default function About({ mode, text, contact }) {
   const isHacker = mode === 'hacker';
@@ -23,11 +25,19 @@ export default function About({ mode, text, contact }) {
               <span></span><span></span><span></span>
               <p className="font-mono">{isHacker ? "face_scan.bin" : "profile.jpg"}</p>
             </div>
+            <p className="profile-hint">
+              {isHacker ? "hover_it_seee" : "hover it seee"}
+            </p>
             <div className="profile-img-wrap">
               <img 
                 src={profileImg} 
                 alt="Atharva Kulkarni" 
-                className="profile-img" 
+                className="profile-img profile-img-hover" 
+              />
+              <img 
+                src={isHacker ? profileHackerImg : profileDevImg} 
+                alt="Atharva Kulkarni Matrix" 
+                className="profile-img profile-img-default" 
               />
             </div>
           </div>
