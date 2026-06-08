@@ -36,7 +36,7 @@ export const content = {
       ]
     },
     about: {
-      text: "I'm a frontend developer who obsesses over the gap between design and code. I build fast, interactive web experiences using React, Tailwind, and Vite — from hackathon prototypes to production-ready apps. I care deeply about UI details, smooth animations, and interfaces that feel good to use. Currently a CS student, always shipping something new."
+      text: "I'm a frontend developer and UI/UX designer who lives in the gap between pixels and logic. I craft fast, interactive web experiences using React, Tailwind, and Vite — obsessing over every hover state, transition timing, and layout rhythm along the way. From wireframe to working product, I own the full visual layer: information architecture, design systems, component libraries, and the micro-interactions that make users actually feel something. I think in grids but break them on purpose. I prototype fast, iterate faster, and never ship something that doesn't feel right at every screen size. Currently a CS student building hackathon prototypes by night and production-ready apps by day — I don't just build interfaces, I design experiences that feel intuitive before they're even learned."
     },
     projects: [
       {

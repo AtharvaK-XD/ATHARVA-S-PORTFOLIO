@@ -95,6 +95,17 @@ export default function App() {
       document.documentElement.style.setProperty("--cursor-x", `${xPercent}%`);
       document.documentElement.style.setProperty("--cursor-y", `${yPercent}%`);
 
+      // 3D parallax tilt on dev-mode background image
+      const bgGridEl = document.querySelector('.bg-grid');
+      if (bgGridEl && document.documentElement.getAttribute('data-mode') !== 'hacker') {
+        const normX = (cursorCurrentX / window.innerWidth) - 0.5;
+        const normY = (cursorCurrentY / window.innerHeight) - 0.5;
+        bgGridEl.style.setProperty('--bg-rx', `${(normY * -12).toFixed(3)}deg`);
+        bgGridEl.style.setProperty('--bg-ry', `${(normX * 12).toFixed(3)}deg`);
+        bgGridEl.style.setProperty('--bg-tx', `${(normX * -75).toFixed(2)}px`);
+        bgGridEl.style.setProperty('--bg-ty', `${(normY * -50).toFixed(2)}px`);
+      }
+
       const dx = Math.abs(cursorTargetX - cursorCurrentX);
       const dy = Math.abs(cursorTargetY - cursorCurrentY);
       if (dx < 0.2 && dy < 0.2) {
@@ -205,8 +216,8 @@ export default function App() {
         const rect = section.getBoundingClientRect();
         const centerY = rect.top + rect.height / 2;
         const offset = (window.innerHeight / 2 - centerY) / window.innerHeight;
-        const shift = Math.max(-14, Math.min(14, offset * 24));
-        const tilt = Math.max(-2.2, Math.min(2.2, offset * 3.6));
+        const shift = Math.max(-22, Math.min(22, offset * 32));
+        const tilt = Math.max(-3.5, Math.min(3.5, offset * 5.5));
         section.style.setProperty("--scroll-shift", `${shift}px`);
         section.style.setProperty("--scroll-tilt", `${tilt}deg`);
         section.classList.add("scroll-3d");
@@ -218,7 +229,14 @@ export default function App() {
         bgGradient.style.transform = `translateY(${scrollTop * -0.03}px)`;
       }
       if (bgGrid) {
-        bgGrid.style.transform = `translateY(${scrollTop * -0.018}px)`;
+        const isDevMode = document.documentElement.getAttribute('data-mode') !== 'hacker';
+        if (isDevMode) {
+          bgGrid.style.removeProperty('transform');
+          bgGrid.style.removeProperty('--bg-scale');
+          bgGrid.style.setProperty('--bg-parallax-y', '0px');
+        } else {
+          bgGrid.style.transform = `translateY(${scrollTop * -0.018}px)`;
+        }
       }
       if (bgNoise) {
         bgNoise.style.transform = `translateY(${scrollTop * -0.012}px)`;
