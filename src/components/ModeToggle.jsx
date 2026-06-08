@@ -7,7 +7,7 @@ export default function ModeToggle({ mode, onToggle }) {
   return (
     <button
       onClick={onToggle}
-      className="fixed bottom-8 right-8 z-[1000] flex items-center gap-2.5 px-5 py-3 rounded-full border backdrop-blur-md transition-all duration-300 hover:scale-105 hover:-translate-y-1 hover:shadow-xl active:scale-95 cursor-pointer font-semibold shadow-lg text-sm tracking-wide"
+      className="flex items-center gap-2.5 px-5 py-3 rounded-full border backdrop-blur-md transition-all duration-300 hover:scale-105 hover:-translate-y-1 hover:shadow-xl active:scale-95 cursor-pointer font-semibold shadow-lg text-sm tracking-wide"
       style={{
         background: isDev 
           ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.015) 60%, rgba(255, 255, 255, 0.0) 60.1%, rgba(255, 255, 255, 0.01) 100%)' 

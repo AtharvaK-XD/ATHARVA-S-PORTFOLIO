@@ -93,6 +93,15 @@ export const content = {
         url: "https://github.com/AtharvaK-XD/CampusRent",
         image: campusrentImg,
         btnText: "Open Repository"
+      },
+      {
+        id: "07",
+        status: "queued",
+        title: "More Projects Coming Soon",
+        description: "New interactive web experiences, frontend dashboards, and client applications are currently in development.",
+        detailedDescription: "Project pipeline status: ACTIVE. Additional fullstack applications, interactive UI components, custom design systems, and frontend dashboard cockpits are currently in the wireframing and prototyping phases. Check back soon for deployment releases.",
+        url: "#",
+        btnText: "Access Restricted"
       }
     ],
     techSkills: [

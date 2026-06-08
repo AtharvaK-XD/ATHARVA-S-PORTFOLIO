@@ -1,4 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&display=swap');
 @import "tailwindcss";
+
 
 :root {
   --bg: #0b0f17;
@@ -1410,4 +1412,59 @@ html:not([data-mode="hacker"]) .skill-chip:hover {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.03) 60%, rgba(255, 255, 255, 0.0) 60.1%, rgba(255, 255, 255, 0.02) 100%) !important;
   border-color: rgba(255, 255, 255, 0.45) !important;
   box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.22), 0 8px 32px 0 rgba(0, 0, 0, 0.35), 0 0 15px var(--glow) !important;
+}
+
+/* System Boot / Splash Fade-in Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Flowchart Particle Drift Animation */
+@keyframes drift {
+  from {
+    transform: translateY(100vh) translateX(0);
+  }
+  to {
+    transform: translateY(-10vh) translateX(15px);
+  }
+}
+
+/* Central Node pulsing glow animation */
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 15px 2px rgba(0, 245, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 32px 10px rgba(0, 245, 255, 0.85);
+  }
+  100% {
+    box-shadow: 0 0 15px 2px rgba(0, 245, 255, 0.4);
+  }
+}
+
+.pulse-glow-cyan {
+  animation: pulseGlow 2s infinite ease-in-out;
+}
+
+/* Glowing connecting lines keyframe animation */
+@keyframes dash {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+
+.glowing-path {
+  stroke-dasharray: 6 6;
+  animation: dash 1.5s linear infinite;
 }

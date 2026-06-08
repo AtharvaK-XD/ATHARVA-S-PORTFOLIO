@@ -1,9 +1,7 @@
 import { useState } from 'react';
 
 export function useMode() {
-  const [mode, setMode] = useState(() => {
-    return localStorage.getItem('portfolioMode') || 'dev';
-  });
+  const [mode, setMode] = useState('dev');
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [contentVisible, setContentVisible] = useState(true);
   const [scanlineActive, setScanlineActive] = useState(false);
@@ -25,7 +23,6 @@ export function useMode() {
     // After content is hidden, perform the switch in background but keep loader active
     setTimeout(() => {
       setMode(nextMode);
-      localStorage.setItem('portfolioMode', nextMode);
       window.scrollTo(0, 0);
     }, 500);
 
@@ -50,6 +47,10 @@ export function useMode() {
     }, 1400);
   };
 
+  const initializeMode = (targetMode) => {
+    setMode(targetMode);
+  };
+
   return {
     mode,
     isTransitioning,
@@ -58,6 +59,7 @@ export function useMode() {
     glitchActive,
     transitionTarget,
     transitionFadeOut,
-    triggerModeSwitch
+    triggerModeSwitch,
+    initializeMode
   };
 }

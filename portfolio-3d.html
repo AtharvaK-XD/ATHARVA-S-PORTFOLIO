@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atharva Kulkarni | 3D Interactive Flowchart</title>
+  
+  <!-- Import Fonts from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  
+  <!-- Load Three.js r128 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #020914;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+    }
+    canvas:active {
+      cursor: grabbing;
+    }
+    
+    /* HUD overlay positioned absolutely above the canvas */
+    #hud {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+    .hud-top-left {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      color: #00f5ff;
+      opacity: 0.6;
+      letter-spacing: 2px;
+      text-shadow: 0 0 8px rgba(0, 245, 255, 0.4);
+    }
+    .hud-bottom-right {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: #00b0ff;
+      opacity: 0.65;
+      align-self: flex-end;
+      letter-spacing: 1.5px;
+      text-shadow: 0 0 5px rgba(0, 176, 255, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HTML HUD Overlay -->
+  <div id="hud">
+    <div class="hud-top-left">ATHARVA.SYS</div>
+    <div class="hud-bottom-right">[ DRAG TO ORBIT · SCROLL TO ZOOM · CLICK NODES ]</div>
+  </div>
+
+  <script>
+    // Constant for user photo - easily swappable
+    const PHOTO_URL = "/flowchart-avatar.jpg";
+
+    // Data for Nodes
+    const NODES_DATA = [
+      {
+        id: 'about',
+        label: 'ABOUT ME',
+        angle: 90, // 12 o'clock
+        color: 0xff6b35,
+        colorHexStr: '#ff6b35',
+        iconSymbol: '>_',
+        subNodeData: [
+          { id: 'about-1', label: 'CS Student @ Vadodara' },
+          { id: 'about-2', label: 'Dev & Hacker' }
+        ]
+      },
+      {
+        id: 'projects',
+        label: 'PROJECTS',
+        angle: 18, // 2 o'clock
+        color: 0xff2d78,
+        colorHexStr: '#ff2d78',
+        iconSymbol: '</>',
+        subNodeData: [
+          { id: 'proj-1', label: 'BinRoute' },
+          { id: 'proj-2', label: 'Revvy' },
+          { id: 'proj-3', label: 'HyperFocus' },
+          { id: 'proj-4', label: 'CampusRent' }
+        ]
+      },
+      {
+        id: 'blogs',
+        label: 'BLOGS',
+        angle: 306, // 5 o'clock
+        color: 0x39ff14,
+        colorHexStr: '#39ff14',
+        iconSymbol: '📝',
+        subNodeData: [
+          { id: 'blog-1', label: 'LinkedIn Articles' },
+          { id: 'blog-2', label: 'Dev Writeups' }
+        ]
+      },
+      {
+        id: 'skills',
+        label: 'SKILLS',
+        angle: 234, // 7 o'clock
+        color: 0xc800ff,
+        colorHexStr: '#c800ff',
+        iconSymbol: '⚡',
+        subNodeData: [
+          { id: 'skill-1', label: 'React / Vite' },
+          { id: 'skill-2', label: 'Supabase / Node' },
+          { id: 'skill-3', label: 'TryHackMe / HTB' },
+          { id: 'skill-4', label: 'UI/UX Design' }
+        ]
+      },
+      {
+        id: 'contact',
+        label: 'CONTACT',
+        angle: 162, // 10 o'clock
+        color: 0xffe600,
+        colorHexStr: '#ffe600',
+        iconSymbol: '📡',
+        subNodeData: [
+          { id: 'contact-1', label: 'GitHub', url: 'https://github.com/atharva-kulkarni-developer' },
+          { id: 'contact-2', label: 'LinkedIn', url: 'https://linkedin.com/in/atharva-kulkarni' },
+          { id: 'contact-3', label: 'Email', url: 'mailto:kulkarniatharva529@gmail.com' }
+        ]
+      }
+    ];
+
+    // Global variables
+    let scene, camera, renderer;
+    let centralNodeGroup, torus1, torus2;
+    let nodesList = [];
+    let subNodesList = [];
+    let clickableNodes = [];
+    let expandedNodeId = null;
+    let hoveredNode = null;
+    let nebulaMeshes = [];
+
+    // Dragging & Orbiting variables
+    let isDragging = false;
+    let prevMouse = { x: 0, y: 0 };
+    let spherical = { theta: 0, phi: Math.PI / 3 };
+    let R = 280; // camera zoom distance
+
+    const canvas = document.createElement('canvas');
+    document.body.appendChild(canvas);
+
+    // Initialize 3D Engine
+    init();
+    animate();
+
+    function init() {
+      // 1. Setup Scene
+      scene = new THREE.Scene();
+
+      // 2. Setup Camera
+      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+      updateCameraPosition();
+
+      // 3. Setup WebGL Renderer
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      // 4. Setup Lighting
+      const ambientLight = new THREE.AmbientLight(0x112244, 0.8);
+      scene.add(ambientLight);
+
+      // Central point light at origin (cyan)
+      const centerLight = new THREE.PointLight(0x00f5ff, 2, 400);
+      scene.add(centerLight);
+
+      // 4 Quadrant lights for space ambience matching the color schemes
+      const light1 = new THREE.PointLight(0xff6b35, 0.6, 250); light1.position.set(150, 150, 50); scene.add(light1);
+      const light2 = new THREE.PointLight(0xff2d78, 0.6, 250); light2.position.set(-150, 150, -50); scene.add(light2);
+      const light3 = new THREE.PointLight(0x39ff14, 0.6, 250); light3.position.set(-150, -150, 50); scene.add(light3);
+      const light4 = new THREE.PointLight(0xc800ff, 0.6, 250); light4.position.set(150, -150, -50); scene.add(light4);
+
+      // 5. Space Environment & Grid Floor
+      createSpaceEnvironment();
+
+      // 6. Central Hub Node Setup
+      createCentralNode();
+
+      // 7. Radial Orbital Nodes Setup
+      createOrbitalNodes();
+
+      // 8. Event Listeners
+      setupInteractionEvents();
+    }
+
+    function createSpaceEnvironment() {
+      // Star Field
+      const starGeo = new THREE.BufferGeometry();
+      const starCount = 2000;
+      const starPositions = new Float32Array(starCount * 3);
+      for (let i = 0; i < starCount * 3; i++) {
+        starPositions[i] = (Math.random() - 0.5) * 2000;
+      }
+      starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+      const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 0.8,
+        transparent: true,
+        opacity: 0.6
+      }));
+      scene.add(stars);
+
+      // Nebula Radial Canvas Textures
+      const nebulaColors = ['#00f5ff', '#ff2d78', '#c800ff'];
+      for (let i = 0; i < 3; i++) {
+        const geo = new THREE.PlaneGeometry(500, 500);
+        const texture = createNebulaTexture(nebulaColors[i]);
+        const mat = new THREE.MeshBasicMaterial({
+          map: texture,
+          transparent: true,
+          opacity: 0.16,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+          side: THREE.DoubleSide
+        });
+        const mesh = new THREE.Mesh(geo, mat);
+
+        const dist = 300 + Math.random() * 100;
+        const angle = (i / 3) * Math.PI * 2;
+        mesh.position.set(
+          Math.cos(angle) * dist,
+          (Math.random() - 0.5) * 150,
+          Math.sin(angle) * dist
+        );
+        mesh.lookAt(0, 0, 0);
+        scene.add(mesh);
+        nebulaMeshes.push(mesh);
+      }
+
+      // faint Cyberpunk Grid Floor
+      const gridHelper = new THREE.GridHelper(600, 30, 0x00f5ff, 0x112244);
+      gridHelper.position.y = -180;
+      gridHelper.material.opacity = 0.22;
+      gridHelper.material.transparent = true;
+      scene.add(gridHelper);
+    }
+
+    function createNebulaTexture(colorHexStr) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+      const grad = ctx.createRadialGradient(256, 256, 0, 256, 256, 256);
+      grad.addColorStop(0, colorHexStr + '44'); // semi-transparent center
+      grad.addColorStop(0.5, colorHexStr + '11');
+      grad.addColorStop(1, 'rgba(0,0,0,0)'); // transparent edge
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 512, 512);
+      return new THREE.CanvasTexture(canvas);
+    }
+
+    function createCentralNode() {
+      centralNodeGroup = new THREE.Group();
+      scene.add(centralNodeGroup);
+
+      // Base sphere geometry
+      const sphereGeo = new THREE.SphereGeometry(45, 64, 64);
+      const sphereMat = new THREE.MeshStandardMaterial({
+        roughness: 0.3,
+        metalness: 0.2
+      });
+      const photoSphere = new THREE.Mesh(sphereGeo, sphereMat);
+      centralNodeGroup.add(photoSphere);
+
+      // Setup Fallback & load user texture
+      const textureLoader = new THREE.TextureLoader();
+      textureLoader.setCrossOrigin('anonymous');
+      
+      const fallback = createFallbackTexture();
+      sphereMat.map = fallback; // start with fallback initials AK
+
+      textureLoader.load(
+        PHOTO_URL,
+        (texture) => {
+          sphereMat.map = texture;
+          sphereMat.needsUpdate = true;
+        },
+        undefined,
+        (err) => {
+          console.warn("Using fallback texture for central sphere");
+        }
+      );
+
+      // Torus Glow Ring 1
+      const torusGeo1 = new THREE.TorusGeometry(52, 2, 16, 100);
+      const torusMat1 = new THREE.MeshStandardMaterial({
+        color: 0x00f5ff,
+        emissive: 0x00f5ff,
+        emissiveIntensity: 2
+      });
+      torus1 = new THREE.Mesh(torusGeo1, torusMat1);
+      torus1.rotation.x = Math.PI / 2;
+      centralNodeGroup.add(torus1);
+
+      // Torus outer aura Ring 2 (translucent)
+      const torusGeo2 = new THREE.TorusGeometry(58, 1.2, 8, 100);
+      const torusMat2 = new THREE.MeshStandardMaterial({
+        color: 0x00f5ff,
+        transparent: true,
+        opacity: 0.25,
+        emissive: 0x00f5ff,
+        emissiveIntensity: 0.5
+      });
+      torus2 = new THREE.Mesh(torusGeo2, torusMat2);
+      torus2.rotation.x = Math.PI / 2;
+      centralNodeGroup.add(torus2);
+
+      // Name Label Sprite
+      const nameSprite = createTextSprite('Atharva Kulkarni', '#00f5ff', 36, "'Orbitron', sans-serif");
+      nameSprite.position.set(0, -65, 0);
+      nameSprite.scale.set(105, 26, 1);
+      centralNodeGroup.add(nameSprite);
+
+      // Subtitle Sprite
+      const subSprite = createTextSprite('Frontend Dev & Ethical Hacker', '#00b0ff', 24, "'Share Tech Mono', monospace");
+      subSprite.position.set(0, -78, 0);
+      subSprite.scale.set(90, 22, 1);
+      centralNodeGroup.add(subSprite);
+    }
+
+    function createFallbackTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#050d1a';
+      ctx.fillRect(0, 0, 256, 256);
+      ctx.strokeStyle = '#00f5ff';
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.arc(128, 128, 120, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.font = 'bold 90px Orbitron, sans-serif';
+      ctx.fillStyle = '#00f5ff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = '#00f5ff';
+      ctx.shadowBlur = 15;
+      ctx.fillText('AK', 128, 128);
+      return new THREE.CanvasTexture(canvas);
+    }
+
+    function createOrbitalNodes() {
+      NODES_DATA.forEach((node) => {
+        // Trigonometric placement on tilted orbital plane (15 degrees)
+        const angleRad = (node.angle * Math.PI) / 180;
+        const tiltMatrix = new THREE.Matrix4().makeRotationX(15 * Math.PI / 180);
+        const position = new THREE.Vector3(
+          Math.cos(angleRad) * 160,
+          Math.sin(angleRad) * 160,
+          0
+        ).applyMatrix4(tiltMatrix);
+
+        // Core Sphere Mesh
+        const sphereGeo = new THREE.SphereGeometry(28, 32, 32);
+        const sphereMat = new THREE.MeshStandardMaterial({
+          color: node.color,
+          emissive: node.color,
+          emissiveIntensity: 0.6,
+          roughness: 0.2,
+          metalness: 0.7
+        });
+        const mesh = new THREE.Mesh(sphereGeo, sphereMat);
+        mesh.position.copy(position);
+        scene.add(mesh);
+
+        // Glow shell
+        const glowGeo = new THREE.SphereGeometry(33, 16, 16);
+        const glowMat = new THREE.MeshBasicMaterial({
+          color: node.color,
+          transparent: true,
+          opacity: 0.12,
+          side: THREE.BackSide
+        });
+        const glowShell = new THREE.Mesh(glowGeo, glowMat);
+        mesh.add(glowShell);
+
+        // Torus Ring rotated randomly
+        const torusGeo = new THREE.TorusGeometry(34, 1.2, 8, 60);
+        const torusMat = new THREE.MeshStandardMaterial({
+          color: node.color,
+          emissive: node.color,
+          emissiveIntensity: 1.5
+        });
+        const ring = new THREE.Mesh(torusGeo, torusMat);
+        ring.rotation.set(
+          Math.random() * Math.PI,
+          Math.random() * Math.PI,
+          0
+        );
+        mesh.add(ring);
+
+        // Icon Sprite centered
+        const iconSprite = createIconSprite(node.iconSymbol, node.colorHexStr);
+        mesh.add(iconSprite);
+
+        // Title Label Sprite
+        const labelSprite = createTextSprite(node.label, node.colorHexStr, 28, "'Share Tech Mono', monospace");
+        labelSprite.position.set(0, -42, 0);
+        labelSprite.scale.set(70, 18, 1);
+        mesh.add(labelSprite);
+
+        // UserData properties for raycasting
+        mesh.userData = {
+          id: node.id,
+          type: 'orbital'
+        };
+
+        // Draw Connector Beam
+        const points = [new THREE.Vector3(0, 0, 0), position];
+        
+        // Inner glowing core
+        const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+        const lineMat = new THREE.LineBasicMaterial({
+          color: node.color,
+          transparent: true,
+          opacity: 0.7
+        });
+        const line = new THREE.Line(lineGeo, lineMat);
+        scene.add(line);
+
+        // Outer glow halo line
+        const haloMat = new THREE.LineBasicMaterial({
+          color: node.color,
+          transparent: true,
+          opacity: 0.2
+        });
+        const haloLine = new THREE.Line(lineGeo, haloMat);
+        scene.add(haloLine);
+
+        // Flowing energy particles points
+        const particleCount = 8;
+        const ptsArray = new Float32Array(particleCount * 3);
+        const progress = Array.from({ length: particleCount }, () => Math.random());
+        const ptsGeo = new THREE.BufferGeometry();
+        ptsGeo.setAttribute('position', new THREE.BufferAttribute(ptsArray, 3));
+        const ptsMat = new THREE.PointsMaterial({
+          color: node.color,
+          size: 3.5,
+          transparent: true,
+          opacity: 0.9,
+          blending: THREE.AdditiveBlending
+        });
+        const pointsObj = new THREE.Points(ptsGeo, ptsMat);
+        scene.add(pointsObj);
+
+        // Add to global lists for tracking
+        nodesList.push({
+          id: node.id,
+          mesh: mesh,
+          color: node.color,
+          colorHexStr: node.colorHexStr,
+          position: position,
+          angle: node.angle,
+          subNodeData: node.subNodeData,
+          type: 'orbital',
+          particles: pointsObj,
+          particleProgress: progress
+        });
+
+        clickableNodes.push(mesh);
+      });
+    }
+
+    function createTextSprite(text, colorHexStr, fontSize, fontFamily) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = 'rgba(0,0,0,0)';
+      ctx.fillRect(0, 0, 512, 128);
+      ctx.font = `bold ${fontSize}px ${fontFamily}`;
+      ctx.fillStyle = colorHexStr;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = colorHexStr;
+      ctx.shadowBlur = 8;
+      ctx.fillText(text, 256, 64);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      const mat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+      return new THREE.Sprite(mat);
+    }
+
+    function createIconSprite(symbol, colorHexStr) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 128;
+      canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = 'rgba(0,0,0,0)';
+      ctx.fillRect(0, 0, 128, 128);
+      ctx.font = 'bold 58px Share Tech Mono, monospace';
+      ctx.fillStyle = colorHexStr;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = colorHexStr;
+      ctx.shadowBlur = 10;
+      ctx.fillText(symbol, 64, 64);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      const mat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+      const sprite = new THREE.Sprite(mat);
+      sprite.scale.set(22, 22, 1);
+      return sprite;
+    }
+
+    function setupInteractionEvents() {
+      // Mouse drags for orbiting camera
+      window.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        prevMouse = { x: e.clientX, y: e.clientY };
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+          spherical.theta -= (e.clientX - prevMouse.x) * 0.005;
+          spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi - (e.clientY - prevMouse.y) * 0.005));
+          prevMouse = { x: e.clientX, y: e.clientY };
+          updateCameraPosition();
+        }
+
+        // Raycasting for hovered highlights
+        const mouseVec = new THREE.Vector2(
+          (e.clientX / window.innerWidth) * 2 - 1,
+          -(e.clientY / window.innerHeight) * 2 + 1
+        );
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(mouseVec, camera);
+        const intersects = raycaster.intersectObjects(clickableNodes);
+
+        if (intersects.length > 0) {
+          hoveredNode = intersects[0].object;
+          document.body.style.cursor = 'pointer';
+        } else {
+          hoveredNode = null;
+          document.body.style.cursor = isDragging ? 'grabbing' : 'grab';
+        }
+      });
+
+      window.addEventListener('mouseup', () => {
+        isDragging = false;
+        document.body.style.cursor = 'grab';
+      });
+
+      // Touch Drag support
+      window.addEventListener('touchstart', (e) => {
+        if (e.touches.length !== 1) return;
+        isDragging = true;
+        const touch = e.touches[0];
+        prevMouse = { x: touch.clientX, y: touch.clientY };
+      }, { passive: true });
+
+      window.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        const touch = e.touches[0];
+        spherical.theta -= (touch.clientX - prevMouse.x) * 0.005;
+        spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi - (touch.clientY - prevMouse.y) * 0.005));
+        prevMouse = { x: touch.clientX, y: touch.clientY };
+        updateCameraPosition();
+      }, { passive: true });
+
+      window.addEventListener('touchend', () => {
+        isDragging = false;
+      });
+
+      // Scroll Zoom
+      window.addEventListener('wheel', (e) => {
+        R = Math.max(150, Math.min(500, R + e.deltaY * 0.3));
+        updateCameraPosition();
+      }, { passive: true });
+
+      // Click detection Raycaster
+      window.addEventListener('click', (e) => {
+        const mouseVec = new THREE.Vector2(
+          (e.clientX / window.innerWidth) * 2 - 1,
+          -(e.clientY / window.innerHeight) * 2 + 1
+        );
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(mouseVec, camera);
+        const intersects = raycaster.intersectObjects(clickableNodes);
+
+        if (intersects.length > 0) {
+          const clickedMesh = intersects[0].object;
+          if (clickedMesh.userData.type === 'orbital') {
+            expandSubNodes(clickedMesh.userData.id);
+          } else if (clickedMesh.userData.type === 'subnode') {
+            if (clickedMesh.userData.url) {
+              window.open(clickedMesh.userData.url, '_blank');
+            }
+          }
+        } else {
+          // Click background to collapse active nodes
+          collapseActiveNode();
+        }
+      });
+
+      // Window Resize handler
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
+
+    function updateCameraPosition() {
+      camera.position.set(
+        R * Math.sin(spherical.phi) * Math.sin(spherical.theta),
+        R * Math.cos(spherical.phi),
+        R * Math.sin(spherical.phi) * Math.cos(spherical.theta)
+      );
+      camera.lookAt(0, 0, 0);
+    }
+
+    function expandSubNodes(parentId) {
+      if (expandedNodeId === parentId) {
+        collapseActiveNode();
+        return;
+      }
+
+      collapseActiveNode();
+      expandedNodeId = parentId;
+
+      const parentNode = nodesList.find(n => n.id === parentId);
+      if (!parentNode) return;
+
+      const parentMesh = parentNode.mesh;
+      const parentPos = parentMesh.position.clone();
+      const dir = parentPos.clone().normalize();
+
+      // Perpendicular vectors to draw 3D outward cone
+      const temp = Math.abs(dir.y) < 0.99 ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(1, 0, 0);
+      const T = new THREE.Vector3().crossVectors(dir, temp).normalize();
+      const B = new THREE.Vector3().crossVectors(dir, T).normalize();
+
+      const subRadius = 55;
+      const outwardDist = 45;
+      const subNodeData = parentNode.subNodeData;
+      const N = subNodeData.length;
+
+      subNodeData.forEach((sub, i) => {
+        const angle = (i / N) * Math.PI * 2;
+        const offset = dir.clone().multiplyScalar(outwardDist)
+          .add(T.clone().multiplyScalar(Math.cos(angle) * subRadius))
+          .add(B.clone().multiplyScalar(Math.sin(angle) * subRadius));
+
+        const targetPos = parentPos.clone().add(offset);
+
+        // Sub Node Mesh
+        const subGeo = new THREE.SphereGeometry(16, 32, 32);
+        const subMat = new THREE.MeshStandardMaterial({
+          color: parentNode.color,
+          emissive: parentNode.color,
+          emissiveIntensity: 0.4,
+          roughness: 0.2,
+          metalness: 0.7
+        });
+        const subMesh = new THREE.Mesh(subGeo, subMat);
+        subMesh.position.copy(parentPos); // Spawn at parent center
+        subMesh.scale.set(0.01, 0.01, 0.01);
+        scene.add(subMesh);
+
+        // Glow shell for sub-node
+        const glowGeo = new THREE.SphereGeometry(19, 16, 16);
+        const glowMat = new THREE.MeshBasicMaterial({
+          color: parentNode.color,
+          transparent: true,
+          opacity: 0.15,
+          side: THREE.BackSide
+        });
+        const glowMesh = new THREE.Mesh(glowGeo, glowMat);
+        subMesh.add(glowMesh);
+
+        // Label sprite
+        const textSprite = createTextSprite(sub.label, parentNode.colorHexStr, 24, "'Share Tech Mono', monospace");
+        textSprite.position.set(0, -25, 0);
+        textSprite.scale.set(65, 16, 1);
+        subMesh.add(textSprite);
+
+        subMesh.userData = {
+          id: sub.id,
+          type: 'subnode',
+          url: sub.url
+        };
+
+        // Thinner connection line
+        const points = [parentPos.clone(), parentPos.clone()];
+        const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+        const lineMat = new THREE.LineBasicMaterial({
+          color: parentNode.color,
+          transparent: true,
+          opacity: 0
+        });
+        const subLine = new THREE.Line(lineGeo, lineMat);
+        scene.add(subLine);
+
+        subNodesList.push({
+          mesh: subMesh,
+          line: subLine,
+          parentPos: parentPos.clone(),
+          targetPos: targetPos.clone(),
+          progress: 0,
+          state: 'expanding'
+        });
+
+        clickableNodes.push(subMesh);
+      });
+    }
+
+    function collapseActiveNode() {
+      if (!expandedNodeId) return;
+
+      subNodesList.forEach((sub) => {
+        sub.state = 'collapsing';
+      });
+
+      clickableNodes = clickableNodes.filter(c => c.userData.type !== 'subnode');
+      expandedNodeId = null;
+    }
+
+    // Animation Render Loop
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const time = Date.now() * 0.0015;
+
+      // 1. Slow Auto-rotation of the entire scene when not dragging
+      if (!isDragging) {
+        scene.rotation.y += 0.0006;
+      }
+
+      // 2. Pulse emissive central cyan rings
+      if (torus1 && torus2) {
+        torus1.material.emissiveIntensity = 2.0 + Math.sin(time * 1.5);
+        torus2.rotation.z += 0.003;
+        torus1.rotation.z -= 0.002;
+      }
+
+      // 3. Nebula rotations
+      nebulaMeshes.forEach((neb, idx) => {
+        neb.rotation.z += 0.0002 * (idx + 1);
+      });
+
+      // 4. Update orbital flowing energy particles along lines
+      nodesList.forEach((node) => {
+        const positions = node.particles.geometry.attributes.position.array;
+        for (let i = 0; i < 8; i++) {
+          node.particleProgress[i] += 0.003;
+          if (node.particleProgress[i] > 1) {
+            node.particleProgress[i] = 0;
+          }
+          const t = node.particleProgress[i];
+          const curr = new THREE.Vector3().lerpVectors(new THREE.Vector3(0, 0, 0), node.position, t);
+          positions[i * 3] = curr.x;
+          positions[i * 3 + 1] = curr.y;
+          positions[i * 3 + 2] = curr.z;
+        }
+        node.particles.geometry.attributes.position.needsUpdate = true;
+
+        // Slow hover animation checks
+        const isHovered = hoveredNode && hoveredNode.uuid === node.mesh.uuid;
+        const targetScale = isHovered ? 1.15 : 1.0;
+        const targetIntensity = isHovered ? 2.0 : 0.6;
+        
+        node.mesh.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.15);
+        node.mesh.material.emissiveIntensity += (targetIntensity - node.mesh.material.emissiveIntensity) * 0.15;
+      });
+
+      // 5. Expand & Collapse Sub-nodes Tween animation
+      subNodesList.forEach((sub) => {
+        if (sub.state === 'expanding') {
+          sub.progress += 1;
+          const t = sub.progress / 40;
+          const easeT = 1 - Math.pow(1 - t, 3); // Cubic Ease Out
+          
+          sub.mesh.position.lerpVectors(sub.parentPos, sub.targetPos, easeT);
+          sub.mesh.scale.set(easeT, easeT, easeT);
+
+          // Update connector lines
+          const linePos = sub.line.geometry.attributes.position.array;
+          linePos[0] = sub.parentPos.x;
+          linePos[1] = sub.parentPos.y;
+          linePos[2] = sub.parentPos.z;
+          linePos[3] = sub.mesh.position.x;
+          linePos[4] = sub.mesh.position.y;
+          linePos[5] = sub.mesh.position.z;
+          sub.line.geometry.attributes.position.needsUpdate = true;
+          sub.line.material.opacity = easeT * 0.75;
+
+          if (sub.progress >= 40) {
+            sub.state = 'expanded';
+          }
+        } else if (sub.state === 'collapsing') {
+          sub.progress -= 1.5; // Collapse slightly faster
+          const t = Math.max(0, sub.progress / 40);
+          const easeT = t * t; // Ease In
+          
+          sub.mesh.position.lerpVectors(sub.parentPos, sub.targetPos, easeT);
+          sub.mesh.scale.set(easeT, easeT, easeT);
+
+          const linePos = sub.line.geometry.attributes.position.array;
+          linePos[0] = sub.parentPos.x;
+          linePos[1] = sub.parentPos.y;
+          linePos[2] = sub.parentPos.z;
+          linePos[3] = sub.mesh.position.x;
+          linePos[4] = sub.mesh.position.y;
+          linePos[5] = sub.mesh.position.z;
+          sub.line.geometry.attributes.position.needsUpdate = true;
+          sub.line.material.opacity = easeT * 0.75;
+
+          if (sub.progress <= 0) {
+            scene.remove(sub.mesh);
+            scene.remove(sub.line);
+            sub.mesh.geometry.dispose();
+            sub.mesh.material.dispose();
+            sub.line.geometry.dispose();
+            sub.line.material.dispose();
+            
+            subNodesList = subNodesList.filter(s => s !== sub);
+          }
+        }
+
+        // Sub node hover scaling checks
+        const isHovered = hoveredNode && hoveredNode.uuid === sub.mesh.uuid;
+        const targetScale = isHovered ? 1.15 : 1.0;
+        const targetIntensity = isHovered ? 1.5 : 0.4;
+        
+        if (sub.state === 'expanded') {
+          sub.mesh.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.15);
+          sub.mesh.material.emissiveIntensity += (targetIntensity - sub.mesh.material.emissiveIntensity) * 0.15;
+        }
+      });
+
+      renderer.render(scene, camera);
+    }
+  </script>
+</body>
+</html>

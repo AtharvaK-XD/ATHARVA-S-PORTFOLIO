@@ -9,9 +9,11 @@ import Skills from './components/Skills';
 import Blog from './components/Blog';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
-import ModeToggle from './components/ModeToggle';
 import { InitialLoader, TransitionLoader } from './components/Loader';
 import samuraiBg from './assets/samurai-bg.png';
+import Splash from './components/Splash';
+import FlowChart from './components/FlowChart';
+import flowchartAvatar from './assets/flowchart-avatar.jpg';
 
 import './styles/transitions.css';
 
@@ -24,15 +26,17 @@ export default function App() {
     glitchActive,
     transitionTarget,
     transitionFadeOut,
-    triggerModeSwitch
+    triggerModeSwitch,
+    initializeMode
   } = useMode();
 
   const [initialLoading, setInitialLoading] = useState(true);
   const [loaderFadeOut, setLoaderFadeOut] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [showSplash, setShowSplash] = useState(true);
 
   const canvasRef = useRef(null);
-  const data = content[mode];
+  const data = content[mode] || content.dev;
 
   // Initial loading progress simulator
   useEffect(() => {
@@ -313,23 +317,52 @@ export default function App() {
       )}
 
       {/* Main Content wrapper with dynamic fade transition */}
-      <div className={`page-content-fade ${contentVisible ? 'visible' : ''}`}>
-        <Navbar mode={mode} data={data.navbar} />
-        
-        <main>
-          <Hero mode={mode} data={data.hero} glitchActive={glitchActive} />
-          <About mode={mode} text={data.about.text} contact={data.contact} />
-          <Projects mode={mode} projects={data.projects} />
-          <Blog mode={mode} blogs={data.blogs} emptyState={data.emptyState} />
-          <Skills mode={mode} techSkills={data.techSkills} softSkills={data.softSkills} />
-          <Contact mode={mode} contact={data.contact} />
-        </main>
-        
-        <Footer mode={mode} contact={data.contact} />
-      </div>
+      {mode === 'flowchart' ? (
+        <div className={`page-content-fade ${contentVisible ? 'visible' : ''}`}>
+          <FlowChart photoUrl={flowchartAvatar} />
+        </div>
+      ) : (
+        <div className={`page-content-fade ${contentVisible ? 'visible' : ''}`}>
+          <Navbar mode={mode} data={data.navbar} />
+          
+          <main>
+            <Hero mode={mode} data={data.hero} glitchActive={glitchActive} />
+            <About mode={mode} text={data.about.text} contact={data.contact} />
+            <Projects mode={mode} projects={data.projects} />
+            <Blog mode={mode} blogs={data.blogs} emptyState={data.emptyState} />
+            <Skills mode={mode} techSkills={data.techSkills} softSkills={data.softSkills} />
+            <Contact mode={mode} contact={data.contact} />
+          </main>
+          
+          <Footer mode={mode} contact={data.contact} />
+        </div>
+      )}
 
-      {/* Floating Identity Switcher */}
-      <ModeToggle mode={mode} onToggle={triggerModeSwitch} />
+      {/* Floating Back to Selection Button */}
+      <button
+        onClick={() => setShowSplash(true)}
+        className={`fixed bottom-8 right-8 z-[1000] flex items-center gap-2.5 px-5 py-3 rounded-full border backdrop-blur-md transition-all duration-300 hover:scale-105 hover:-translate-y-1 hover:shadow-xl active:scale-95 cursor-pointer font-semibold shadow-lg text-sm tracking-wide ${
+          mode === 'flowchart' 
+            ? 'bg-[rgba(255,230,0,0.1)] border-[rgba(255,230,0,0.3)] hover:border-[#ffe600] hover:shadow-[0_0_20px_rgba(255,230,0,0.25)] text-[#ffe600]' 
+            : mode === 'hacker'
+              ? 'bg-[rgba(3,31,23,0.85)] border-[#0f4f3d] hover:border-[#00ff41] hover:shadow-[0_0_20px_rgba(0,255,65,0.25)] text-[#00ff41] font-mono'
+              : 'bg-[rgba(255,255,255,0.08)] border-[rgba(255,255,255,0.18)] hover:border-[#00e5ff] hover:shadow-[0_0_20px_rgba(0,229,255,0.25)] text-[#00e5ff]'
+        }`}
+      >
+        <span>[ Back to Selection ]</span>
+      </button>
+
+      {/* Splash Selection Screen */}
+      {!initialLoading && showSplash && (
+        <Splash 
+          onSelectMode={(selectedMode) => {
+            initializeMode(selectedMode);
+          }} 
+          onFadeComplete={() => {
+            setShowSplash(false);
+          }}
+        />
+      )}
 
       {/* Initial Page Loader overlay */}
       {initialLoading && (
