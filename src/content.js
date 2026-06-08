@@ -184,6 +184,15 @@ export const content = {
         detailedDescription: "KaliCMD is an A-Z commands directory and reference index designed for penetration testers and security researchers. It houses an index of 256 Kali Linux commands organized across 24 lettered dropdown sections. It features real-time search with keyword matching across command names and descriptions, quick lettered anchor navigation bar, keyboard hotkey triggers (like pressing '/' to search and 'Esc' to clear), and one-click copy buttons to copy commands instantly.",
         url: "https://kalicmd.netlify.app/",
         image: kalicmdImg
+      },
+      {
+        id: "03",
+        status: "queued",
+        title: "More Projects Coming Soon",
+        description: "Additional security tools, OSINT workflows, and automation scripts are currently under active development.",
+        detailedDescription: "System queue status: ACTIVE. Additional penetration testing tools, CTF writeups, security auditing scripts, and custom payloads are currently in the coding and testing phases. Access to source code files will be granted upon compile verification. Check back soon for updates.",
+        url: "#",
+        btnText: "Access Restricted"
       }
     ],
     techSkills: [
