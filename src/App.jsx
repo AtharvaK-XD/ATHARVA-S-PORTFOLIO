@@ -11,6 +11,7 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import ModeToggle from './components/ModeToggle';
 import { InitialLoader, TransitionLoader } from './components/Loader';
+import samuraiBg from './assets/samurai-bg.png';
 
 import './styles/transitions.css';
 
@@ -288,7 +289,13 @@ export default function App() {
     <>
       {/* Dynamic backgrounds */}
       <div className="bg-gradient" aria-hidden="true"></div>
-      <div className="bg-grid" aria-hidden="true"></div>
+      <div 
+        className="bg-grid" 
+        style={{ 
+          backgroundImage: mode !== 'hacker' ? `radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.45) 100%), linear-gradient(rgba(11, 15, 23, 0.30), rgba(11, 15, 23, 0.40)), url(${samuraiBg})` : undefined 
+        }} 
+        aria-hidden="true"
+      ></div>
       <div className="bg-scanlines" aria-hidden="true"></div>
       <div className="bg-noise" aria-hidden="true"></div>
       <canvas ref={canvasRef} id="matrixRain" className="matrix-rain" aria-hidden="true"></canvas>

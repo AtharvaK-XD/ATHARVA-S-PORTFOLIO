@@ -125,10 +125,7 @@ html:not([data-mode="hacker"]) .bg-grid {
   --bg-scale: 1.30;
   --bg-parallax-y: 0px;
 
-  background-image:
-    radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.45) 100%),
-    linear-gradient(rgba(11, 15, 23, 0.30), rgba(11, 15, 23, 0.40)),
-    url('./assets/samurai-bg.png');
+  /* background-image is set dynamically in App.jsx to ensure Vite bundles and links it correctly */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
