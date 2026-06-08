@@ -159,7 +159,7 @@ export const content = {
       stats: [
         { value: "2", label: "Security Tools" },
         { value: "CTF", label: "Player" },
-        { value: "OSINT", label: "Specialist" },
+        { value: "Cybersecurity", label: "Specialist" },
         { value: "Always", label: "Learning" }
       ]
     },
