@@ -30,7 +30,7 @@ export default function App() {
     initializeMode
   } = useMode();
 
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(false);
   const [loaderFadeOut, setLoaderFadeOut] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [showSplash, setShowSplash] = useState(true);
@@ -41,6 +41,7 @@ export default function App() {
 
   // Initial loading progress simulator
   useEffect(() => {
+    if (!initialLoading) return;
     const duration = 1800; // 1.8 seconds
     const intervalTime = 30;
     const steps = duration / intervalTime;
