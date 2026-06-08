@@ -26,7 +26,7 @@ export default function About({ mode, text, contact }) {
               <p className="font-mono">{isHacker ? "face_scan.bin" : "profile.jpg"}</p>
             </div>
             <p className="profile-hint">
-              {isHacker ? "hover_it_seee" : "hover it seee"}
+              {isHacker ? "hover_it_too_see" : "hover it too see"}
             </p>
             <div className="profile-img-wrap">
               <img 
