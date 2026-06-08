@@ -34,6 +34,7 @@ export default function App() {
   const [loaderFadeOut, setLoaderFadeOut] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [showSplash, setShowSplash] = useState(true);
+  const [hasSelected, setHasSelected] = useState(false);
 
   const canvasRef = useRef(null);
   const data = content[mode] || content.dev;
@@ -292,71 +293,85 @@ export default function App() {
   return (
     <>
       {/* Dynamic backgrounds */}
-      <div className="bg-gradient" aria-hidden="true"></div>
-      <div 
-        className="bg-grid" 
-        style={{ 
-          backgroundImage: mode !== 'hacker' ? `radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.45) 100%), linear-gradient(rgba(11, 15, 23, 0.30), rgba(11, 15, 23, 0.40)), url(${samuraiBg})` : undefined 
-        }} 
-        aria-hidden="true"
-      ></div>
-      <div className="bg-scanlines" aria-hidden="true"></div>
-      <div className="bg-noise" aria-hidden="true"></div>
-      <canvas ref={canvasRef} id="matrixRain" className="matrix-rain" aria-hidden="true"></canvas>
+      {hasSelected && (
+        <>
+          <div className="bg-gradient" aria-hidden="true"></div>
+          <div 
+            className="bg-grid" 
+            style={{ 
+              backgroundImage: mode !== 'hacker' ? `radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.45) 100%), linear-gradient(rgba(11, 15, 23, 0.30), rgba(11, 15, 23, 0.40)), url(${samuraiBg})` : undefined 
+            }} 
+            aria-hidden="true"
+          ></div>
+          <div className="bg-scanlines" aria-hidden="true"></div>
+          <div className="bg-noise" aria-hidden="true"></div>
+          <canvas ref={canvasRef} id="matrixRain" className="matrix-rain" aria-hidden="true"></canvas>
+        </>
+      )}
 
       {/* Mode Switch Scanline Sweep Overlay */}
-      <div className={`mode-transition-overlay ${isTransitioning ? 'show' : ''}`} aria-hidden="true">
-        {scanlineActive && (
-          <div className={`scanline-sweep-line scanline-sweep-active ${mode}`} />
-        )}
-      </div>
+      {hasSelected && (
+        <div className={`mode-transition-overlay ${isTransitioning ? 'show' : ''}`} aria-hidden="true">
+          {scanlineActive && (
+            <div className={`scanline-sweep-line scanline-sweep-active ${mode}`} />
+          )}
+        </div>
+      )}
 
       {/* Mode Switch Transition Loader */}
-      {isTransitioning && transitionTarget && (
+      {hasSelected && isTransitioning && transitionTarget && (
         <TransitionLoader targetMode={transitionTarget} fadeOut={transitionFadeOut} />
       )}
 
       {/* Main Content wrapper with dynamic fade transition */}
-      {mode === 'flowchart' ? (
-        <div className={`page-content-fade ${contentVisible ? 'visible' : ''}`}>
-          <FlowChart photoUrl={flowchartAvatar} />
-        </div>
-      ) : (
-        <div className={`page-content-fade ${contentVisible ? 'visible' : ''}`}>
-          <Navbar mode={mode} data={data.navbar} />
-          
-          <main>
-            <Hero mode={mode} data={data.hero} glitchActive={glitchActive} />
-            <About mode={mode} text={data.about.text} contact={data.contact} />
-            <Projects mode={mode} projects={data.projects} />
-            <Blog mode={mode} blogs={data.blogs} emptyState={data.emptyState} />
-            <Skills mode={mode} techSkills={data.techSkills} softSkills={data.softSkills} />
-            <Contact mode={mode} contact={data.contact} />
-          </main>
-          
-          <Footer mode={mode} contact={data.contact} />
-        </div>
+      {hasSelected && (
+        mode === 'flowchart' ? (
+          <div className={`page-content-fade ${contentVisible ? 'visible' : ''}`}>
+            <FlowChart photoUrl={flowchartAvatar} />
+          </div>
+        ) : (
+          <div className={`page-content-fade ${contentVisible ? 'visible' : ''}`}>
+            <Navbar mode={mode} data={data.navbar} />
+            
+            <main>
+              <Hero mode={mode} data={data.hero} glitchActive={glitchActive} />
+              <About mode={mode} text={data.about.text} contact={data.contact} />
+              <Projects mode={mode} projects={data.projects} />
+              <Blog mode={mode} blogs={data.blogs} emptyState={data.emptyState} />
+              <Skills mode={mode} techSkills={data.techSkills} softSkills={data.softSkills} />
+              <Contact mode={mode} contact={data.contact} />
+            </main>
+            
+            <Footer mode={mode} contact={data.contact} />
+          </div>
+        )
       )}
 
       {/* Floating Back to Selection Button */}
-      <button
-        onClick={() => setShowSplash(true)}
-        className={`fixed bottom-8 right-8 z-[1000] flex items-center gap-2.5 px-5 py-3 rounded-full border backdrop-blur-md transition-all duration-300 hover:scale-105 hover:-translate-y-1 hover:shadow-xl active:scale-95 cursor-pointer font-semibold shadow-lg text-sm tracking-wide ${
-          mode === 'flowchart' 
-            ? 'bg-[rgba(255,230,0,0.1)] border-[rgba(255,230,0,0.3)] hover:border-[#ffe600] hover:shadow-[0_0_20px_rgba(255,230,0,0.25)] text-[#ffe600]' 
-            : mode === 'hacker'
-              ? 'bg-[rgba(3,31,23,0.85)] border-[#0f4f3d] hover:border-[#00ff41] hover:shadow-[0_0_20px_rgba(0,255,65,0.25)] text-[#00ff41] font-mono'
-              : 'bg-[rgba(255,255,255,0.08)] border-[rgba(255,255,255,0.18)] hover:border-[#00e5ff] hover:shadow-[0_0_20px_rgba(0,229,255,0.25)] text-[#00e5ff]'
-        }`}
-      >
-        <span>[ Back to Selection ]</span>
-      </button>
+      {hasSelected && (
+        <button
+          onClick={() => {
+            setShowSplash(true);
+            setHasSelected(false);
+          }}
+          className={`fixed bottom-8 right-8 z-[1000] flex items-center gap-2.5 px-5 py-3 rounded-full border backdrop-blur-md transition-all duration-300 hover:scale-105 hover:-translate-y-1 hover:shadow-xl active:scale-95 cursor-pointer font-semibold shadow-lg text-sm tracking-wide ${
+            mode === 'flowchart' 
+              ? 'bg-[rgba(255,230,0,0.1)] border-[rgba(255,230,0,0.3)] hover:border-[#ffe600] hover:shadow-[0_0_20px_rgba(255,230,0,0.25)] text-[#ffe600]' 
+              : mode === 'hacker'
+                ? 'bg-[rgba(3,31,23,0.85)] border-[#0f4f3d] hover:border-[#00ff41] hover:shadow-[0_0_20px_rgba(0,255,65,0.25)] text-[#00ff41] font-mono'
+                : 'bg-[rgba(255,255,255,0.08)] border-[rgba(255,255,255,0.18)] hover:border-[#00e5ff] hover:shadow-[0_0_20px_rgba(0,229,255,0.25)] text-[#00e5ff]'
+          }`}
+        >
+          <span>[ Back to Selection ]</span>
+        </button>
+      )}
 
       {/* Splash Selection Screen */}
       {!initialLoading && showSplash && (
         <Splash 
           onSelectMode={(selectedMode) => {
             initializeMode(selectedMode);
+            setHasSelected(true);
           }} 
           onFadeComplete={() => {
             setShowSplash(false);
