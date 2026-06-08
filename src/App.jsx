@@ -10,7 +10,7 @@ import Blog from './components/Blog';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import { InitialLoader, TransitionLoader } from './components/Loader';
-import samuraiBg from './assets/samurai-bg.png';
+import samuraiBg from './assets/samurai-bg.jpg';
 import Splash from './components/Splash';
 import FlowChart from './components/FlowChart';
 import flowchartAvatar from './assets/flowchart-avatar.jpg';
