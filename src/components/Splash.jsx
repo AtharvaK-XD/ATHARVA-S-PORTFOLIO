@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import samuraiBgJpg from '../assets/samurai-bg.jpg';
+import flowchartPreviewImg from '../assets/flowchart_preview.png';
 
 export default function Splash({ onSelectMode, onFadeComplete }) {
   const [isFadingOut, setIsFadingOut] = useState(false);
@@ -83,7 +85,7 @@ export default function Splash({ onSelectMode, onFadeComplete }) {
         className={`absolute inset-0 bg-cover bg-center transition-all duration-700 ease-in-out pointer-events-none z-[1] filter blur-[2px] brightness-[0.28] scale-102 ${
           hoveredMode === 'dev' ? 'opacity-85' : 'opacity-0'
         }`}
-        style={{ backgroundImage: `url('${import.meta.env.BASE_URL}samurai-bg.jpg')` }}
+        style={{ backgroundImage: `url(${samuraiBgJpg})` }}
       />
       
       {/* HACKER MODE: Live Matrix Rain Canvas */}
@@ -99,7 +101,7 @@ export default function Splash({ onSelectMode, onFadeComplete }) {
         className={`absolute inset-0 bg-cover bg-center transition-all duration-700 ease-in-out pointer-events-none z-[1] filter blur-[12px] brightness-[0.22] scale-105 ${
           hoveredMode === 'flowchart' ? 'opacity-75' : 'opacity-0'
         }`}
-        style={{ backgroundImage: `url('${import.meta.env.BASE_URL}flowchart_preview.png')` }}
+        style={{ backgroundImage: `url(${flowchartPreviewImg})` }}
       />
 
       <div className="relative z-10 w-full max-w-4xl flex flex-col items-center text-center">
