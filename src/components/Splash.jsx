@@ -202,11 +202,11 @@ export default function Splash({ onSelectMode, onFadeComplete }) {
             <div className="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-slate-600 group-hover:border-[#ffe600] transition-colors" />
 
             <div className="font-mono text-[10px] tracking-widest text-[#ffe600] uppercase bg-[rgba(255,230,0,0.08)] px-2 py-0.5 rounded border border-[rgba(255,230,0,0.2)] mb-4">
-              SYS_FLOWCHART.sys
+              THE_VOIDS_GALAXY.sys
             </div>
             
             <h2 className="text-xl font-bold font-mono tracking-wide mb-3 text-slate-200 group-hover:text-[#ffe600] transition-colors">
-              Flowchart Mode
+              The Void's Galaxy
             </h2>
             
             <p className="text-sm text-slate-400 leading-relaxed group-hover:text-slate-300 transition-colors">
