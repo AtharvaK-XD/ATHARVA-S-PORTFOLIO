@@ -145,7 +145,7 @@ export default function App() {
 
   // 3. Matrix Rain Background Canvas (runs on Hacker Mode)
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || !hasSelected) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     let animationId;
@@ -163,32 +163,45 @@ export default function App() {
 
       const fontSize = 16;
       const columnCount = Math.ceil(width / fontSize);
-      columns = Array.from({ length: columnCount }, () => Math.random() * -height);
+      columns = Array.from({ length: columnCount }, () => Math.random() * -100);
     };
 
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    const chars = "01アイウエオカキクケコサシスセソABCDEFGHIJKLMNOPQRSTUVWXYZ#$%&*@";
+    const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&*+=-/\\|?<>";
     const fontSize = 16;
 
     const draw = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
-      ctx.fillStyle = "rgba(1, 7, 4, 0.16)";
+      
+      // Original smooth trailer fade
+      ctx.fillStyle = "rgba(1, 5, 4, 0.08)";
       ctx.fillRect(0, 0, width, height);
-      ctx.font = `${fontSize}px JetBrains Mono, monospace`;
+      ctx.font = `${fontSize}px 'Share Tech Mono', monospace`;
 
       for (let i = 0; i < columns.length; i++) {
+        const char = chars[Math.floor(Math.random() * chars.length)];
         const x = i * fontSize;
         const y = columns[i];
-        const char = chars[Math.floor(Math.random() * chars.length)];
-        ctx.fillStyle = i % 5 === 0 ? "rgba(110,255,180,0.95)" : "rgba(24,255,140,0.72)";
-        ctx.fillText(char, x, y);
-        columns[i] += fontSize;
 
-        if (columns[i] > height + Math.random() * 260) {
-          columns[i] = Math.random() * -240;
+        const isBoosted = document.body.classList.contains("matrix-boost");
+        if (isBoosted) {
+          ctx.fillStyle = i % 4 === 0 ? "rgba(220, 255, 230, 0.95)" : "rgba(24, 255, 140, 0.82)";
+        } else {
+          ctx.fillStyle = i % 6 === 0 ? "rgba(160, 255, 195, 0.75)" : "rgba(0, 255, 65, 0.42)";
+        }
+
+        ctx.fillText(char, x, y);
+
+        // Standard speed is 10, boosted speed is 24
+        const speed = isBoosted ? 24 : 10;
+        columns[i] += speed;
+
+        // Reset to top
+        if (columns[i] > height && Math.random() > 0.982) {
+          columns[i] = Math.random() * -80;
         }
       }
       animationId = requestAnimationFrame(draw);
@@ -204,6 +217,19 @@ export default function App() {
       cancelAnimationFrame(animationId);
       window.removeEventListener('resize', resizeCanvas);
     };
+  }, [mode, hasSelected]);
+
+  // 3b. Matrix Boost Effect on mode transitions
+  useEffect(() => {
+    if (mode === 'hacker') {
+      document.body.classList.add('matrix-boost');
+      const timer = setTimeout(() => {
+        document.body.classList.remove('matrix-boost');
+      }, 2000);
+      return () => clearTimeout(timer);
+    } else {
+      document.body.classList.remove('matrix-boost');
+    }
   }, [mode]);
 
   // 4. 3D Scroll tilt & Focus/Defocus animations
