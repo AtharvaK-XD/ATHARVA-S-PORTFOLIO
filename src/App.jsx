@@ -30,7 +30,7 @@ export default function App() {
     initializeMode
   } = useMode();
 
-  const [initialLoading, setInitialLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [loaderFadeOut, setLoaderFadeOut] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [showSplash, setShowSplash] = useState(true);
@@ -394,7 +394,7 @@ export default function App() {
       )}
 
       {/* Splash Selection Screen */}
-      {!initialLoading && showSplash && (
+      {showSplash && (
         <Splash 
           onSelectMode={(selectedMode) => {
             initializeMode(selectedMode);
