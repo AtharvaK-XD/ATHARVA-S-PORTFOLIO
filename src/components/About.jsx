@@ -5,7 +5,7 @@ import profileHackerImg from '../assets/profile_hacker.png';
 
 export default function About({ mode, text, contact }) {
   const isHacker = mode === 'hacker';
-  const { email, github, linkedin } = contact;
+  const { email, github, linkedin, tryhackme } = contact;
 
   return (
     <section id="about" className="section reveal show">
@@ -74,6 +74,16 @@ export default function About({ mode, text, contact }) {
             >
               LinkedIn: atharva-kulkarni-a16a5a3b9
             </a>
+            {tryhackme && (
+              <a 
+                className="info-link text-sm" 
+                href={tryhackme} 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                TryHackMe: kulkarniatharva529
+              </a>
+            )}
           </aside>
         </div>
       </div>

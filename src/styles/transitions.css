@@ -79,7 +79,7 @@
 
 /* Cursor Crosshair Style for Hacker Mode */
 .cursor-crosshair {
-  cursor: crosshair !important;
+  cursor: auto;
 }
 
 /* Interactive custom styles for skills and project cards */
