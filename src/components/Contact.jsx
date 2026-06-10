@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function Contact({ mode, contact }) {
   const isHacker = mode === 'hacker';
-  const { heading, subtext, email, github, linkedin } = contact;
+  const { heading, subtext, email, github, linkedin, tryhackme } = contact;
 
   return (
     <section id="contact" className="section reveal show">
@@ -49,6 +49,17 @@ export default function Contact({ mode, contact }) {
           >
             LinkedIn
           </a>
+          {tryhackme && (
+            <a 
+              className="btn btn-secondary" 
+              href={tryhackme} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{ fontFamily: isHacker ? 'var(--mono)' : 'inherit' }}
+            >
+              TryHackMe
+            </a>
+          )}
         </div>
       </div>
     </section>
