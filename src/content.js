@@ -30,7 +30,7 @@ export const content = {
       ],
       stats: [
         { value: "6", label: "Featured Builds" },
-        { value: "Cyber Security", label: "Focus Area" },
+        { value: "Frontend", label: "Focus Area" },
         { value: "UI/UX", label: "Craft" },
         { value: "Always", label: "Learning" }
       ]
