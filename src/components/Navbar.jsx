@@ -1,5 +1,4 @@
 import React from 'react';
-import { Download } from 'lucide-react';
 
 export default function Navbar({ mode, data }) {
   const { logo, links, badge } = data;
@@ -35,17 +34,6 @@ export default function Navbar({ mode, data }) {
               </a>
             ))}
           </nav>
-          <a 
-            href="/Atharva_Kulkarni_Resume.pdf" 
-            download="Atharva_Kulkarni_Resume.pdf"
-            className="resume-btn"
-            style={{
-              fontFamily: mode === 'hacker' ? 'var(--mono)' : 'inherit'
-            }}
-          >
-            <Download size={14} className="mr-1.5" />
-            <span>{mode === 'hacker' ? 'resume.sh' : 'Resume'}</span>
-          </a>
         </div>
       </div>
     </header>

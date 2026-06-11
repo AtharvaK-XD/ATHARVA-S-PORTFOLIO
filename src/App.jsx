@@ -374,11 +374,10 @@ export default function App() {
       )}
 
       {/* Floating Back to Selection Button */}
-      {hasSelected && (
+      {hasSelected && !showSplash && (
         <button
           onClick={() => {
             setShowSplash(true);
-            setHasSelected(false);
           }}
           className={`fixed bottom-8 right-8 z-[1000] flex items-center gap-2.5 px-5 py-3 rounded-full border backdrop-blur-md transition-all duration-300 hover:scale-105 hover:-translate-y-1 hover:shadow-xl active:scale-95 cursor-pointer font-semibold shadow-lg text-sm tracking-wide ${
             mode === 'flowchart' 
@@ -401,6 +400,10 @@ export default function App() {
           }} 
           onFadeComplete={() => {
             setShowSplash(false);
+          }}
+          fadeEntry={hasSelected}
+          onFadeInComplete={() => {
+            setHasSelected(false);
           }}
         />
       )}

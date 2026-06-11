@@ -10,8 +10,20 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   
+  <script>
+    window.onerror = function(message, source, lineno, colno, error) {
+      const msg = encodeURIComponent('[Head Error] ' + message + ' at ' + source + ':' + lineno + ':' + colno);
+      fetch('/browser-error?msg=' + msg).catch(() => {});
+    };
+    window.addEventListener('unhandledrejection', function(event) {
+      const msg = encodeURIComponent('[Head Rejection] ' + event.reason);
+      fetch('/browser-error?msg=' + msg).catch(() => {});
+    });
+  </script>
   <!-- Load Three.js r128 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="./three-r128.min.js?v=128" 
+          onload="fetch('/browser-error?msg=ThreeJS_Load_Success').catch(()=>{})"
+          onerror="fetch('/browser-error?msg=ThreeJS_Load_Failure').catch(()=>{})"></script>
 
   <style>
     * {
@@ -169,19 +181,27 @@
     document.body.appendChild(canvas);
 
     // Initialize 3D Engine
-    init();
-    animate();
+    try {
+      fetch('/browser-error?msg=Calling_Init').catch(()=>{});
+      init();
+      fetch('/browser-error?msg=Init_Success').catch(()=>{});
+      fetch('/browser-error?msg=Calling_Animate').catch(()=>{});
+      animate();
+    } catch (err) {
+      fetch('/browser-error?msg=' + encodeURIComponent('Init_Error: ' + err.message + '\n' + err.stack)).catch(()=>{});
+    }
 
     function init() {
       // 1. Setup Scene
       scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x020914);
 
       // 2. Setup Camera
       camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
       updateCameraPosition();
 
       // 3. Setup WebGL Renderer
-      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
 

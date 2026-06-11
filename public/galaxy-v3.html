@@ -10,8 +10,20 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   
+  <script>
+    window.onerror = function(message, source, lineno, colno, error) {
+      const msg = encodeURIComponent('[Head Error] ' + message + ' at ' + source + ':' + lineno + ':' + colno);
+      fetch('/browser-error?msg=' + msg).catch(() => {});
+    };
+    window.addEventListener('unhandledrejection', function(event) {
+      const msg = encodeURIComponent('[Head Rejection] ' + event.reason);
+      fetch('/browser-error?msg=' + msg).catch(() => {});
+    });
+  </script>
   <!-- Load Three.js r128 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="./three-r128.min.js?v=128" 
+          onload="fetch('/browser-error?msg=ThreeJS_Load_Success').catch(()=>{})"
+          onerror="fetch('/browser-error?msg=ThreeJS_Load_Failure').catch(()=>{})"></script>
 
   <style>
     * {
@@ -56,14 +68,42 @@
       letter-spacing: 2px;
       text-shadow: 0 0 8px rgba(0, 245, 255, 0.4);
     }
-    .hud-bottom-right {
+    .hud-instructions {
       font-family: 'Share Tech Mono', monospace;
       font-size: 11px;
       color: #00b0ff;
       opacity: 0.6;
-      align-self: flex-end;
       letter-spacing: 1.5px;
       text-shadow: 0 0 5px rgba(0, 176, 255, 0.3);
+      margin-top: 6px;
+    }
+    .hud-back-btn {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      pointer-events: auto;
+      z-index: 20;
+      display: inline-block;
+      padding: 12px 28px;
+      border-radius: 9999px;
+      border: 1.5px solid #ffe600;
+      background: rgba(255, 230, 0, 0.08);
+      color: #ffe600;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .hud-back-btn:hover {
+      background: rgba(255, 230, 0, 0.15);
+      box-shadow: 0 0 20px rgba(255, 230, 0, 0.25);
+      transform: scale(1.05);
+    }
+    .hud-back-btn:active {
+      transform: scale(0.95);
     }
   </style>
 </head>
@@ -71,8 +111,11 @@
 
   <!-- HTML HUD Overlay -->
   <div id="hud">
-    <div class="hud-top-left">ATHARVA.SYS</div>
-    <div class="hud-bottom-right">[ DRAG TO ORBIT · SCROLL TO ZOOM · CLICK NODES ]</div>
+    <div>
+      <div class="hud-top-left">ATHARVA.SYS</div>
+      <div class="hud-instructions">[ DRAG TO ORBIT · SCROLL TO ZOOM · CLICK NODES ]</div>
+    </div>
+    <a href="./" class="hud-back-btn">[ Back to Selection ]</a>
   </div>
   <div id="error-console" style="position: absolute; top: 60px; left: 24px; color: #ff3333; font-family: 'Share Tech Mono', monospace; z-index: 99999; font-size: 14px; pointer-events: none; white-space: pre-wrap; text-shadow: 0 0 8px rgba(255, 0, 0, 0.8);"></div>
 
@@ -96,6 +139,7 @@
       const msg = encodeURIComponent(Array.from(arguments).join(' '));
       fetch('/browser-error?msg=' + msg).catch(() => {});
     };
+    fetch('/browser-error?msg=Body_Script_Start').catch(()=>{});
 
     // ============================================
     // CONFIGURATION — EDIT THESE
@@ -244,49 +288,60 @@
 
     const canvas = document.createElement('canvas');
     document.body.appendChild(canvas);
+    canvas.addEventListener("webglcontextlost", function(event) {
+      event.preventDefault();
+      fetch('/browser-error?msg=WebGL_Context_Lost').catch(()=>{});
+    }, false);
 
 
 
     function init() {
-      // 1. Setup Scene & Atmospheric Fog
-      scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x020914, 0.0012);
+      try {
+         fetch('/browser-error?msg=Init_Start').catch(()=>{});
+        // 1. Setup Scene & Atmospheric Fog
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000000);
+        scene.fog = new THREE.FogExp2(0x000000, 0.0012);
 
-      // 2. Setup Camera
-      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-      updateCameraPosition();
-      scene.add(camera);
+        // 2. Setup Camera
+        camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        updateCameraPosition();
+        scene.add(camera);
 
-      // 3. Setup WebGL Renderer
-      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-      renderer.setPixelRatio(window.devicePixelRatio);
-      renderer.setSize(window.innerWidth, window.innerHeight);
+        // 3. Setup WebGL Renderer
+        renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
 
-      // 4. Cinematic Lighting Setup
-      const ambientLight = new THREE.AmbientLight(0x405570, 0.95);
-      
-      const starLight = new THREE.DirectionalLight(0xb0d4ff, 2.5);
-      starLight.position.set(-200, 300, 150);
+        // 4. Cinematic Lighting Setup
+        const ambientLight = new THREE.AmbientLight(0x405570, 0.95);
+        
+        const starLight = new THREE.DirectionalLight(0xb0d4ff, 2.5);
+        starLight.position.set(-200, 300, 150);
 
-      const rimLight = new THREE.DirectionalLight(0xff4400, 0.4);
-      rimLight.position.set(300, -100, -200);
+        const rimLight = new THREE.DirectionalLight(0xff4400, 0.4);
+        rimLight.position.set(300, -100, -200);
 
-      const coreLight = new THREE.PointLight(0x00f5ff, 1.5, 300);
-      coreLight.position.set(0, 0, 0);
+        const coreLight = new THREE.PointLight(0x00f5ff, 1.5, 300);
+        coreLight.position.set(0, 0, 0);
 
-      scene.add(ambientLight, starLight, rimLight, coreLight);
+        scene.add(ambientLight, starLight, rimLight, coreLight);
 
-      // 5. Space Environment & Grid Floor
-      createSpaceEnvironment();
+        // 5. Space Environment & Grid Floor
+        createSpaceEnvironment();
 
-      // 6. Central Hub Node Setup (Center Photo)
-      createCentralNode();
+        // 6. Central Hub Node Setup (Center Photo)
+        createCentralNode();
 
-      // 7. Radial Orbital Nodes Setup (Procedural Planets)
-      createOrbitalNodes();
+        // 7. Radial Orbital Nodes Setup (Procedural Planets)
+        createOrbitalNodes();
 
-      // 8. Event Listeners
-      setupInteractionEvents();
+        // 8. Event Listeners
+        setupInteractionEvents();
+        fetch('/browser-error?msg=Init_Success').catch(()=>{});
+      } catch (err) {
+        fetch('/browser-error?msg=' + encodeURIComponent('Init_Error: ' + err.message + '\n' + err.stack)).catch(()=>{});
+      }
     }
 
     function createSpaceEnvironment() {
@@ -651,9 +706,9 @@
       function createNoiseGenerator() {
         const p = new Uint8Array(256);
         for (let i = 0; i < 256; i++) p[i] = Math.floor(Math.random() * 256);
-        const perm = new Uint8Array(512);
-        const permMod12 = new Uint8Array(512);
-        for (let i = 0; i < 512; i++) {
+        const perm = new Uint8Array(1024);
+        const permMod12 = new Uint8Array(1024);
+        for (let i = 0; i < 1024; i++) {
           perm[i] = p[i & 255];
           permMod12[i] = perm[i] % 12;
         }
@@ -1249,7 +1304,7 @@
             vec4 worldPos = modelMatrix * vec4(position, 1.0);
             vWorldPosition = worldPos.xyz;
             // Get the translation component directly from the modelMatrix (planet center)
-            vec3 planetCenter = modelMatrix[3].xyz;
+            vec3 planetCenter = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
             vWorldNormal = normalize(worldPos.xyz - planetCenter);
             vViewDirection = normalize(cameraPosition - worldPos.xyz);
             gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
@@ -2085,198 +2140,207 @@
       });
     }
 
+    let animateErrorLogged = false;
     // Render loop
     function animate() {
-      requestAnimationFrame(animate);
+      if (animateErrorLogged) return;
+      try {
+        requestAnimationFrame(animate);
 
-      const time = Date.now() * 0.0015;
+        const time = Date.now() * 0.0015;
 
-      // Make the central photo sphere texture always face the camera
-      if (centerSphere) {
-        centerSphere.lookAt(camera.position);
-      }
+        // Make the central photo sphere texture always face the camera
+        if (centerSphere) {
+          centerSphere.lookAt(camera.position);
+        }
 
-      // 1. Zoom Intro Zoom (120 frames)
-      if (introProgress < INTRO_DURATION) {
-        const t = introProgress / INTRO_DURATION;
-        const eased = 1 - Math.pow(1 - t, 3);
-        R = startR + (endR - startR) * eased;
-        introProgress++;
-        updateCameraPosition();
-      } else {
-        // Slow auto-orbit around the center when not dragging
-        if (!isDragging) {
-          spherical.theta += 0.0008;
+        // 1. Zoom Intro Zoom (120 frames)
+        if (introProgress < INTRO_DURATION) {
+          const t = introProgress / INTRO_DURATION;
+          const eased = 1 - Math.pow(1 - t, 3);
+          R = startR + (endR - startR) * eased;
+          introProgress++;
           updateCameraPosition();
-        }
-      }
-
-      // 2. Pulse emissive central cyan torus rings
-      if (torus1 && torus2) {
-        torus1.material.emissiveIntensity = 2.0 + Math.sin(time * 1.5);
-        torus2.rotation.z += 0.003;
-        torus1.rotation.z -= 0.002;
-      }
-
-      // 3. Slowly rotate nebula background sprites
-      nebulaSprites.forEach((neb, idx) => {
-        neb.rotation += 0.0001 * (idx + 1);
-      });
-
-      // 4. Update energy particles and spin procedural orbital planets
-      nodesList.forEach((node) => {
-        // Planet self rotation
-        node.mesh.rotation.y += 0.003;
-
-        // Cloud layer rotation (relative to planet)
-        if (node.cloudMesh) {
-          node.cloudMesh.rotation.y += 0.0012;
-          if (node.cloudShadowMesh) {
-            node.cloudShadowMesh.rotation.y = node.cloudMesh.rotation.y;
+        } else {
+          // Slow auto-orbit around the center when not dragging
+          if (!isDragging) {
+            spherical.theta += 0.0008;
+            updateCameraPosition();
           }
         }
 
-        // Flowing particles along QuadraticBezierCurve
-        const positions = node.particles.geometry.attributes.position.array;
-        for (let i = 0; i < 8; i++) {
-          node.particleProgress[i] += 0.003;
-          if (node.particleProgress[i] > 1) {
-            node.particleProgress[i] = 0;
-          }
-          const t = node.particleProgress[i];
-          const curr = node.curve.getPointAt(t);
-          positions[i * 3] = curr.x;
-          positions[i * 3 + 1] = curr.y;
-          positions[i * 3 + 2] = curr.z;
-        }
-        node.particles.geometry.attributes.position.needsUpdate = true;
-
-        // Hover tween scaling and emissive lighting
-        const isHovered = hoveredNode && hoveredNode.uuid === node.mesh.uuid;
-        const targetScale = isHovered ? 1.15 : 1.0;
-        const targetIntensity = isHovered ? 0.6 : 0.08;
-        
-        node.mesh.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.15);
-        node.mesh.material.emissiveIntensity += (targetIntensity - node.mesh.material.emissiveIntensity) * 0.15;
-      });
-
-      // 5. Expand & Collapse Sub-nodes
-      const remainingSubNodes = [];
-      subNodesList.forEach((sub) => {
-        sub.mesh.rotation.y += 0.003; // Self rotate sub-nodes too
-        let keep = true;
-
-        if (sub.state === 'expanding') {
-          sub.progress += 1;
-          const t = sub.progress / 40;
-          const easeT = 1 - Math.pow(1 - t, 3); // Cubic Ease Out
-          
-          sub.mesh.position.lerpVectors(sub.parentPos, sub.targetPos, easeT);
-          sub.mesh.scale.set(easeT, easeT, easeT);
-
-          sub.line.material.opacity = easeT * 0.35;
-
-          if (sub.progress >= 40) {
-            sub.state = 'expanded';
-          }
-        } else if (sub.state === 'collapsing') {
-          sub.progress -= 1.5;
-          const t = Math.max(0, sub.progress / 40);
-          const easeT = t * t; // Ease In
-          
-          sub.mesh.position.lerpVectors(sub.parentPos, sub.targetPos, easeT);
-          sub.mesh.scale.set(easeT, easeT, easeT);
-
-          sub.line.material.opacity = easeT * 0.35;
-
-          if (sub.progress <= 0) {
-            scene.remove(sub.mesh);
-            scene.remove(sub.line);
-            sub.mesh.geometry.dispose();
-            sub.mesh.material.dispose();
-            sub.line.geometry.dispose();
-            sub.line.material.dispose();
-            keep = false;
-          }
+        // 2. Pulse emissive central cyan torus rings
+        if (torus1 && torus2) {
+          torus1.material.emissiveIntensity = 2.0 + Math.sin(time * 1.5);
+          torus2.rotation.z += 0.003;
+          torus1.rotation.z -= 0.002;
         }
 
-        if (keep) {
-          remainingSubNodes.push(sub);
+        // 3. Slowly rotate nebula background sprites
+        nebulaSprites.forEach((neb, idx) => {
+          neb.rotation += 0.0001 * (idx + 1);
+        });
 
-          // Sub node hover scaling checks
-          const isHovered = hoveredNode && hoveredNode.uuid === sub.mesh.uuid;
+        // 4. Update energy particles and spin procedural orbital planets
+        nodesList.forEach((node) => {
+          // Planet self rotation
+          node.mesh.rotation.y += 0.003;
+
+          // Cloud layer rotation (relative to planet)
+          if (node.cloudMesh) {
+            node.cloudMesh.rotation.y += 0.0012;
+            if (node.cloudShadowMesh) {
+              node.cloudShadowMesh.rotation.y = node.cloudMesh.rotation.y;
+            }
+          }
+
+          // Flowing particles along QuadraticBezierCurve
+          const positions = node.particles.geometry.attributes.position.array;
+          for (let i = 0; i < 8; i++) {
+            node.particleProgress[i] += 0.003;
+            if (node.particleProgress[i] > 1) {
+              node.particleProgress[i] = 0;
+            }
+            const t = node.particleProgress[i];
+            const curr = node.curve.getPointAt(t);
+            positions[i * 3] = curr.x;
+            positions[i * 3 + 1] = curr.y;
+            positions[i * 3 + 2] = curr.z;
+          }
+          node.particles.geometry.attributes.position.needsUpdate = true;
+
+          // Hover tween scaling and emissive lighting
+          const isHovered = hoveredNode && hoveredNode.uuid === node.mesh.uuid;
           const targetScale = isHovered ? 1.15 : 1.0;
-          const targetIntensity = isHovered ? 0.4 : 0.08;
+          const targetIntensity = isHovered ? 0.6 : 0.08;
           
-          if (sub.state === 'expanded') {
-            sub.mesh.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.15);
-            sub.mesh.material.emissiveIntensity += (targetIntensity - sub.mesh.material.emissiveIntensity) * 0.15;
+          node.mesh.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.15);
+          node.mesh.material.emissiveIntensity += (targetIntensity - node.mesh.material.emissiveIntensity) * 0.15;
+        });
+
+        // 5. Expand & Collapse Sub-nodes
+        const remainingSubNodes = [];
+        subNodesList.forEach((sub) => {
+          sub.mesh.rotation.y += 0.003; // Self rotate sub-nodes too
+          let keep = true;
+
+          if (sub.state === 'expanding') {
+            sub.progress += 1;
+            const t = sub.progress / 40;
+            const easeT = 1 - Math.pow(1 - t, 3); // Cubic Ease Out
+            
+            sub.mesh.position.lerpVectors(sub.parentPos, sub.targetPos, easeT);
+            sub.mesh.scale.set(easeT, easeT, easeT);
+
+            sub.line.material.opacity = easeT * 0.35;
+
+            if (sub.progress >= 40) {
+              sub.state = 'expanded';
+            }
+          } else if (sub.state === 'collapsing') {
+            sub.progress -= 1.5;
+            const t = Math.max(0, sub.progress / 40);
+            const easeT = t * t; // Ease In
+            
+            sub.mesh.position.lerpVectors(sub.parentPos, sub.targetPos, easeT);
+            sub.mesh.scale.set(easeT, easeT, easeT);
+
+            sub.line.material.opacity = easeT * 0.35;
+
+            if (sub.progress <= 0) {
+              scene.remove(sub.mesh);
+              scene.remove(sub.line);
+              sub.mesh.geometry.dispose();
+              sub.mesh.material.dispose();
+              sub.line.geometry.dispose();
+              sub.line.material.dispose();
+              keep = false;
+            }
           }
-        }
-      });
-      subNodesList = remainingSubNodes;
 
-      // 6. Expand & Collapse Grandchild-nodes
-      const remainingGrandchildren = [];
-      grandchildNodesList.forEach((gc) => {
-        gc.mesh.rotation.y += 0.003;
-        let keep = true;
+          if (keep) {
+            remainingSubNodes.push(sub);
 
-        if (gc.state === 'expanding') {
-          gc.progress += 1;
-          const t = gc.progress / 40;
-          const easeT = 1 - Math.pow(1 - t, 3); // Cubic Ease Out
-          
-          gc.mesh.position.lerpVectors(gc.parentPos, gc.targetPos, easeT);
-          gc.mesh.scale.set(easeT, easeT, easeT);
-
-          gc.line.material.opacity = easeT * 0.35;
-
-          if (gc.progress >= 40) {
-            gc.state = 'expanded';
+            // Sub node hover scaling checks
+            const isHovered = hoveredNode && hoveredNode.uuid === sub.mesh.uuid;
+            const targetScale = isHovered ? 1.15 : 1.0;
+            const targetIntensity = isHovered ? 0.4 : 0.08;
+            
+            if (sub.state === 'expanded') {
+              sub.mesh.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.15);
+              sub.mesh.material.emissiveIntensity += (targetIntensity - sub.mesh.material.emissiveIntensity) * 0.15;
+            }
           }
-        } else if (gc.state === 'collapsing') {
-          gc.progress -= 1.5;
-          const t = Math.max(0, gc.progress / 40);
-          const easeT = t * t; // Ease In
-          
-          gc.mesh.position.lerpVectors(gc.parentPos, gc.targetPos, easeT);
-          gc.mesh.scale.set(easeT, easeT, easeT);
+        });
+        subNodesList = remainingSubNodes;
 
-          gc.line.material.opacity = easeT * 0.35;
+        // 6. Expand & Collapse Grandchild-nodes
+        const remainingGrandchildren = [];
+        grandchildNodesList.forEach((gc) => {
+          gc.mesh.rotation.y += 0.003;
+          let keep = true;
 
-          if (gc.progress <= 0) {
-            scene.remove(gc.mesh);
-            scene.remove(gc.line);
-            gc.mesh.geometry.dispose();
-            gc.mesh.material.dispose();
-            gc.line.geometry.dispose();
-            gc.line.material.dispose();
-            keep = false;
+          if (gc.state === 'expanding') {
+            gc.progress += 1;
+            const t = gc.progress / 40;
+            const easeT = 1 - Math.pow(1 - t, 3); // Cubic Ease Out
+            
+            gc.mesh.position.lerpVectors(gc.parentPos, gc.targetPos, easeT);
+            gc.mesh.scale.set(easeT, easeT, easeT);
+
+            gc.line.material.opacity = easeT * 0.35;
+
+            if (gc.progress >= 40) {
+              gc.state = 'expanded';
+            }
+          } else if (gc.state === 'collapsing') {
+            gc.progress -= 1.5;
+            const t = Math.max(0, gc.progress / 40);
+            const easeT = t * t; // Ease In
+            
+            gc.mesh.position.lerpVectors(gc.parentPos, gc.targetPos, easeT);
+            gc.mesh.scale.set(easeT, easeT, easeT);
+
+            gc.line.material.opacity = easeT * 0.35;
+
+            if (gc.progress <= 0) {
+              scene.remove(gc.mesh);
+              scene.remove(gc.line);
+              gc.mesh.geometry.dispose();
+              gc.mesh.material.dispose();
+              gc.line.geometry.dispose();
+              gc.line.material.dispose();
+              keep = false;
+            }
           }
-        }
 
-        if (keep) {
-          remainingGrandchildren.push(gc);
+          if (keep) {
+            remainingGrandchildren.push(gc);
 
-          // Grandchild node hover scaling checks
-          const isHovered = hoveredNode && hoveredNode.uuid === gc.mesh.uuid;
-          const targetScale = isHovered ? 1.15 : 1.0;
-          const targetIntensity = isHovered ? 0.4 : 0.08;
-          
-          if (gc.state === 'expanded') {
-            gc.mesh.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.15);
-            gc.mesh.material.emissiveIntensity += (targetIntensity - gc.mesh.material.emissiveIntensity) * 0.15;
+            // Grandchild node hover scaling checks
+            const isHovered = hoveredNode && hoveredNode.uuid === gc.mesh.uuid;
+            const targetScale = isHovered ? 1.15 : 1.0;
+            const targetIntensity = isHovered ? 0.4 : 0.08;
+            
+            if (gc.state === 'expanded') {
+              gc.mesh.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.15);
+              gc.mesh.material.emissiveIntensity += (targetIntensity - gc.mesh.material.emissiveIntensity) * 0.15;
+            }
           }
-        }
-      });
-      grandchildNodesList = remainingGrandchildren;
+        });
+        grandchildNodesList = remainingGrandchildren;
 
-      renderer.render(scene, camera);
+        renderer.render(scene, camera);
+      } catch (err) {
+        animateErrorLogged = true;
+        fetch('/browser-error?msg=' + encodeURIComponent('Animate_Error: ' + err.message + '\n' + err.stack)).catch(()=>{});
+      }
     }
 
     // Initialize 3D Engine after all constants and functions are defined
+    fetch('/browser-error?msg=Calling_Init').catch(()=>{});
     init();
+    fetch('/browser-error?msg=Calling_Animate').catch(()=>{});
     animate();
   </script>
 </body>

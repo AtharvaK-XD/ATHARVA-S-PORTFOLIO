@@ -2,19 +2,44 @@ import React, { useState, useEffect, useRef } from 'react';
 import samuraiBgJpg from '../assets/samurai-bg.jpg';
 import flowchartPreviewImg from '../assets/flowchart_preview.png';
 
-export default function Splash({ onSelectMode, onFadeComplete }) {
+export default function Splash({ onSelectMode, onFadeComplete, fadeEntry = false, onFadeInComplete }) {
+  const [isFadingIn, setIsFadingIn] = useState(fadeEntry);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [hoveredMode, setHoveredMode] = useState(null); // 'dev', 'hacker', 'flowchart', or null
   
   const canvasRef = useRef(null);
 
   const handleSelectMode = (mode) => {
+    if (mode === 'flowchart') {
+      window.location.href = './galaxy-v3.html';
+      return;
+    }
     onSelectMode(mode); // Set mode state immediately
     setIsFadingOut(true); // Trigger transition fade out overlay
     setTimeout(() => {
       onFadeComplete(); // Unmount Splash screen after fade finishes
     }, 500);
   };
+
+  // Handle fade-in transition when returning to selection
+  useEffect(() => {
+    if (fadeEntry) {
+      const timer = setTimeout(() => {
+        setIsFadingIn(false);
+      }, 50);
+
+      const completeTimer = setTimeout(() => {
+        if (onFadeInComplete) {
+          onFadeInComplete();
+        }
+      }, 550);
+
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(completeTimer);
+      };
+    }
+  }, [fadeEntry, onFadeInComplete]);
 
   // Live Matrix Rain Effect for Hacker Mode Hover
   useEffect(() => {
@@ -71,7 +96,7 @@ export default function Splash({ onSelectMode, onFadeComplete }) {
   }, [hoveredMode]);
 
   return (
-    <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#070b12] text-white overflow-y-auto overflow-x-hidden px-4 py-8 transition-all duration-500 ease-in-out ${isFadingOut ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
+    <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#070b12] text-white overflow-y-auto overflow-x-hidden px-4 py-8 transition-all duration-500 ease-in-out ${isFadingIn || isFadingOut ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
       {/* Background Grid Pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#141c2b_1px,transparent_1px),linear-gradient(to_bottom,#141c2b_1px,transparent_1px)] bg-[size:40px_40px] opacity-40 pointer-events-none z-0" />
       
@@ -186,8 +211,8 @@ export default function Splash({ onSelectMode, onFadeComplete }) {
           </button>
 
           {/* FLOWCHART MODE CARD */}
-          <button
-            onClick={() => handleSelectMode('flowchart')}
+          <a
+            href="./galaxy-v3.html"
             onMouseEnter={() => setHoveredMode('flowchart')}
             onMouseLeave={() => setHoveredMode(null)}
             className={`group relative flex flex-col items-center text-center p-6 bg-[#0c1322] border border-[#1b2a47] rounded-xl cursor-pointer transition-all duration-300 ${
@@ -216,7 +241,7 @@ export default function Splash({ onSelectMode, onFadeComplete }) {
             <span className="mt-6 font-mono text-xs text-[#ffe600] opacity-60 group-hover:opacity-100 transition-opacity">
               [ Initialize Entry &gt; ]
             </span>
-          </button>
+          </a>
 
         </div>
 

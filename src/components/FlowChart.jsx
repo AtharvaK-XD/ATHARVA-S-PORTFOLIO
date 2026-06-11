@@ -4,8 +4,8 @@ export default function FlowChart() {
   return (
     <div className="w-full h-screen bg-[#020914] overflow-hidden relative">
       <iframe
-        src="./portfolio-3d-v2.html"
-        className="w-full h-full border-none block"
+        src="./galaxy-v3.html?v=3"
+        className="w-full h-full border-none block bg-[#020914]"
         title="3D Flowchart Portfolio"
       />
     </div>
