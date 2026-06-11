@@ -142,7 +142,8 @@ export const content = {
       subtext: "Open to collaboration, freelance opportunities, and creative technical projects.",
       email: "kulkarniatharva529@gmail.com",
       github: "https://github.com/AtharvaK-XD",
-      linkedin: "https://www.linkedin.com/in/atharva-kulkarni-a16a5a3b9/"
+      linkedin: "https://www.linkedin.com/in/atharva-kulkarni-a16a5a3b9/",
+      tryhackme: "https://tryhackme.com/p/kulkarniatharva529"
     }
   },
   hacker: {
@@ -260,7 +261,8 @@ export const content = {
       subtext: "Open to bug bounty collabs, security research, CTF teams, and freelance security consulting.",
       email: "kulkarniatharva529@gmail.com",
       github: "https://github.com/AtharvaK-XD",
-      linkedin: "https://www.linkedin.com/in/atharva-kulkarni-a16a5a3b9/"
+      linkedin: "https://www.linkedin.com/in/atharva-kulkarni-a16a5a3b9/",
+      tryhackme: "https://tryhackme.com/p/kulkarniatharva529"
     }
   }
 };

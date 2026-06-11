@@ -143,7 +143,8 @@
         subNodeData: [
           { id: 'contact-1', label: 'GitHub', url: 'https://github.com/atharva-kulkarni-developer' },
           { id: 'contact-2', label: 'LinkedIn', url: 'https://linkedin.com/in/atharva-kulkarni' },
-          { id: 'contact-3', label: 'Email', url: 'mailto:kulkarniatharva529@gmail.com' }
+          { id: 'contact-3', label: 'Email', url: 'mailto:kulkarniatharva529@gmail.com' },
+          { id: 'contact-4', label: 'TryHackMe', url: 'https://tryhackme.com/p/kulkarniatharva529' }
         ]
       }
     ];
@@ -529,18 +530,26 @@
       const mat = new THREE.SpriteMaterial({ map: texture, transparent: true });
       const sprite = new THREE.Sprite(mat);
       sprite.scale.set(22, 22, 1);
-      return sprite;
-    }
+      return sprit    function setupInteractionEvents() {
+      let dragStart = { x: 0, y: 0 };
+      const dragThreshold = 5; // pixels
+      let hasDragged = false;
 
-    function setupInteractionEvents() {
       // Mouse drags for orbiting camera
       window.addEventListener('mousedown', (e) => {
         isDragging = true;
         prevMouse = { x: e.clientX, y: e.clientY };
+        dragStart = { x: e.clientX, y: e.clientY };
+        hasDragged = false;
       });
 
       window.addEventListener('mousemove', (e) => {
         if (isDragging) {
+          const dx = e.clientX - dragStart.x;
+          const dy = e.clientY - dragStart.y;
+          if (Math.sqrt(dx * dx + dy * dy) > dragThreshold) {
+            hasDragged = true;
+          }
           spherical.theta -= (e.clientX - prevMouse.x) * 0.005;
           spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi - (e.clientY - prevMouse.y) * 0.005));
           prevMouse = { x: e.clientX, y: e.clientY };
@@ -570,17 +579,26 @@
         document.body.style.cursor = 'grab';
       });
 
+      let touchStart = { x: 0, y: 0 };
+
       // Touch Drag support
       window.addEventListener('touchstart', (e) => {
         if (e.touches.length !== 1) return;
         isDragging = true;
         const touch = e.touches[0];
         prevMouse = { x: touch.clientX, y: touch.clientY };
+        touchStart = { x: touch.clientX, y: touch.clientY };
+        hasDragged = false;
       }, { passive: true });
 
       window.addEventListener('touchmove', (e) => {
         if (!isDragging) return;
         const touch = e.touches[0];
+        const dx = touch.clientX - touchStart.x;
+        const dy = touch.clientY - touchStart.y;
+        if (Math.sqrt(dx * dx + dy * dy) > dragThreshold) {
+          hasDragged = true;
+        }
         spherical.theta -= (touch.clientX - prevMouse.x) * 0.005;
         spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi - (touch.clientY - prevMouse.y) * 0.005));
         prevMouse = { x: touch.clientX, y: touch.clientY };
@@ -599,6 +617,10 @@
 
       // Click detection Raycaster
       window.addEventListener('click', (e) => {
+        if (hasDragged) {
+          hasDragged = false;
+          return;
+        }
         const mouseVec = new THREE.Vector2(
           (e.clientX / window.innerWidth) * 2 - 1,
           -(e.clientY / window.innerHeight) * 2 + 1

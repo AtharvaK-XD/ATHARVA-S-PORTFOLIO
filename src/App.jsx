@@ -69,11 +69,10 @@ export default function App() {
     return () => clearInterval(timer);
   }, []);
 
-  // 1. Sync data-mode and cursor-crosshair class to document/body
+  // 1. Sync data-mode to document
   useEffect(() => {
     const root = document.documentElement;
     root.setAttribute('data-mode', mode === 'hacker' ? 'hacker' : 'normal');
-    document.body.classList.toggle('cursor-crosshair', mode === 'hacker');
   }, [mode]);
 
   // 2. Interactive Cursor Spotlight Effect

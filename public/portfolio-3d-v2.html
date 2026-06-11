@@ -106,7 +106,10 @@
     const LINKS = {
       github: "https://github.com/AtharvaK-XD",
       linkedin: "https://www.linkedin.com/in/atharva-kulkarni-a16a5a3b9/",
-      email: "mailto:kulkarniatharva529@gmail.com"
+      email: "mailto:kulkarniatharva529@gmail.com",
+      tryhackme: "https://tryhackme.com/p/kulkarniatharva529",
+      instagram: "https://www.instagram.com/void._.ai/",
+      youtube: "https://www.youtube.com/@AtharvaKulkarni-k5f"
     };
     // ============================================
 
@@ -116,14 +119,14 @@
         id: 'about',
         label: 'ABOUT ME',
         angle: 90, // 12 o'clock
-        color: 0xff6b35,
-        colorHexStr: '#ff6b35',
-        baseColor: '#3a1a08',
-        accentColor: '#ff6b35',
+        color: 0x00f5ff,
+        colorHexStr: '#00f5ff',
+        baseColor: '#0c1a30',
+        accentColor: '#124016',
         iconSymbol: '>_',
         subNodeData: [
           { id: 'about-1', label: 'CS Student' },
-          { id: 'about-2', label: 'Vadodara' },
+          { id: 'about-2', label: 'Hobbies', isCategory: true, categoryId: 'hobbies' },
           { id: 'about-3', label: 'Dev + Hacker' }
         ]
       },
@@ -131,10 +134,10 @@
         id: 'projects',
         label: 'PROJECTS',
         angle: 18, // 2 o'clock
-        color: 0xff2d78,
-        colorHexStr: '#ff2d78',
-        baseColor: '#2a0a1a',
-        accentColor: '#ff2d78',
+        color: 0xffa500,
+        colorHexStr: '#ffa500',
+        baseColor: '#5c3d2e',
+        accentColor: '#d4a373',
         iconSymbol: '</>',
         subNodeData: [
           { id: 'proj-cat-frontend', label: 'Frontend Projects', isCategory: true, categoryId: 'frontend' },
@@ -145,10 +148,10 @@
         id: 'blogs',
         label: 'BLOGS',
         angle: 306, // 5 o'clock
-        color: 0x39ff14,
-        colorHexStr: '#39ff14',
-        baseColor: '#081a08',
-        accentColor: '#39ff14',
+        color: 0xff4500,
+        colorHexStr: '#ff4500',
+        baseColor: '#8c2d19',
+        accentColor: '#3b120a',
         iconSymbol: '📝',
         subNodeData: [
           { id: 'blog-1', label: 'n8n Chatbot Blog', url: 'https://n8nwriteup.netlify.app/' },
@@ -160,15 +163,15 @@
         id: 'skills',
         label: 'SKILLS',
         angle: 234, // 7 o'clock
-        color: 0xc800ff,
-        colorHexStr: '#c800ff',
-        baseColor: '#1a0828',
-        accentColor: '#c800ff',
+        color: 0x00a8ff,
+        colorHexStr: '#00a8ff',
+        baseColor: '#0a1d4a',
+        accentColor: '#00e5ff',
         iconSymbol: '⚡',
         subNodeData: [
-          { id: 'skill-1', label: 'React/Vite', url: 'https://react.dev' },
-          { id: 'skill-2', label: 'Ethical Hacking & Cyber Security', url: 'https://tryhackme.com' },
-          { id: 'skill-3', label: 'UI/UX Design', url: 'https://figma.com' }
+          { id: 'skill-1', label: 'React/Vite' },
+          { id: 'skill-2', label: 'Cybersecurity' },
+          { id: 'skill-3', label: 'UI/UX Design' }
         ]
       },
       {
@@ -177,13 +180,14 @@
         angle: 162, // 10 o'clock
         color: 0xffe600,
         colorHexStr: '#ffe600',
-        baseColor: '#1a1808',
+        baseColor: '#3a321a',
         accentColor: '#ffe600',
         iconSymbol: '📡',
         subNodeData: [
           { id: 'contact-1', label: 'GitHub', url: LINKS.github },
           { id: 'contact-2', label: 'LinkedIn', url: LINKS.linkedin },
-          { id: 'contact-3', label: 'Email', url: LINKS.email }
+          { id: 'contact-3', label: 'Email', url: LINKS.email },
+          { id: 'contact-4', label: 'Other Socials', isCategory: true, categoryId: 'socials' }
         ]
       }
     ];
@@ -194,7 +198,7 @@
     let nodesList = [];
     let subNodesList = [];
     let clickableNodes = [];
-    let expandedNodeId = null;
+    const expandedNodeIds = new Set();
     let hoveredNode = null;
     let nebulaSprites = [];
     let planetTexturesCache = {};
@@ -212,6 +216,18 @@
     const CYBER_PROJECTS_DATA = [
       { id: 'proj-7', label: 'Rootlock', url: 'https://rootlock.netlify.app' },
       { id: 'proj-8', label: 'KaliCMD', url: 'https://kalicmd.netlify.app/' }
+    ];
+
+    const HOBBIES_DATA = [
+      { id: 'hobby-gaming', label: 'Gaming' },
+      { id: 'hobby-sports', label: 'Sports' },
+      { id: 'hobby-travelling', label: 'Travelling' }
+    ];
+
+    const SOCIALS_DATA = [
+      { id: 'social-youtube', label: 'YouTube', url: LINKS.youtube },
+      { id: 'social-instagram', label: 'Instagram', url: LINKS.instagram },
+      { id: 'social-tryhackme', label: 'TryHackMe', url: LINKS.tryhackme }
     ];
 
     // Dragging & Orbiting variables
@@ -239,11 +255,6 @@
       // 2. Setup Camera
       camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
       updateCameraPosition();
-      
-      // Camera headlight to keep the billboarded photo globe perfectly lit from all viewing angles
-      const headlight = new THREE.DirectionalLight(0xffffff, 1.4);
-      headlight.position.set(0, 0, 1);
-      camera.add(headlight);
       scene.add(camera);
 
       // 3. Setup WebGL Renderer
@@ -252,7 +263,7 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
 
       // 4. Cinematic Lighting Setup
-      const ambientLight = new THREE.AmbientLight(0x0a1628, 1.2);
+      const ambientLight = new THREE.AmbientLight(0x405570, 0.95);
       
       const starLight = new THREE.DirectionalLight(0xb0d4ff, 2.5);
       starLight.position.set(-200, 300, 150);
@@ -495,8 +506,16 @@
           0
         ).applyMatrix4(tiltMatrix);
 
+        // Assign dynamic, realistic radii representing scale differences of solar system counterparts
+        let radius = 28;
+        if (node.id === 'about') radius = 24;      // Earth
+        else if (node.id === 'projects') radius = 33; // Jupiter
+        else if (node.id === 'blogs') radius = 21;    // Mars
+        else if (node.id === 'skills') radius = 26;   // Neptune
+        else if (node.id === 'contact') radius = 30;  // Saturn
+
         // Realistic dark planet procedural globe
-        const sphereGeo = new THREE.SphereGeometry(28, 32, 32);
+        const sphereGeo = new THREE.SphereGeometry(radius, 32, 32);
         
         // Cache the textures so we only generate them once per main node category and reuse for subnodes
         if (!planetTexturesCache[node.id]) {
@@ -504,7 +523,7 @@
         }
         const textures = planetTexturesCache[node.id];
         
-        const isGasGiant = (node.id === 'projects' || node.id === 'skills');
+        const isGasGiant = (node.id === 'projects' || node.id === 'skills' || node.id === 'contact');
         const sphereMat = new THREE.MeshStandardMaterial({
           map: textures.map,
           bumpMap: textures.bumpMap,
@@ -521,46 +540,51 @@
         scene.add(mesh);
 
         // Atmosphere Fresnel Glow
-        const atmosphere = createAtmosphere(28, node.colorHexStr);
+        const atmosphere = createAtmosphere(radius, node.colorHexStr);
         mesh.add(atmosphere);
 
-        // Cloud Layer with parallax rotation
-        const cloudTex = createCloudTexture(node.id);
-        const cloudMat = new THREE.MeshStandardMaterial({
-          map: cloudTex,
-          transparent: true,
-          opacity: 0.85,
-          blending: THREE.NormalBlending,
-          roughness: 0.95,
-          metalness: 0.0
-        });
-        const cloudMesh = new THREE.Mesh(new THREE.SphereGeometry(28.42, 32, 32), cloudMat);
-        mesh.add(cloudMesh);
+        // Earth-only Clouds and Cloud Shadow Layer
+        let cloudMesh = null;
+        let cloudShadowMesh = null;
+        if (node.id === 'about') {
+          const cloudTex = createCloudTexture(node.id);
+          const cloudMat = new THREE.MeshStandardMaterial({
+            map: cloudTex,
+            transparent: true,
+            opacity: 0.85,
+            blending: THREE.NormalBlending,
+            roughness: 0.95,
+            metalness: 0.0
+          });
+          cloudMesh = new THREE.Mesh(new THREE.SphereGeometry(radius + 0.42, 32, 32), cloudMat);
+          mesh.add(cloudMesh);
 
-        // Cloud Shadow Layer (offset away from starLight to project realistic shadow on surface)
-        const cloudShadowMat = new THREE.MeshStandardMaterial({
-          map: cloudTex,
-          color: new THREE.Color(0x000000), // Shadow color is black
-          transparent: true,
-          opacity: 0.45,
-          depthWrite: false
-        });
-        const cloudShadowMesh = new THREE.Mesh(new THREE.SphereGeometry(28.18, 32, 32), cloudShadowMat);
-        const localLightDir = new THREE.Vector3(-200, 300, 150).normalize();
-        cloudShadowMesh.position.copy(localLightDir).multiplyScalar(-0.24);
-        mesh.add(cloudShadowMesh);
+          const cloudShadowMat = new THREE.MeshStandardMaterial({
+            map: cloudTex,
+            color: new THREE.Color(0x000000), // Shadow color is black
+            transparent: true,
+            opacity: 0.45,
+            depthWrite: false
+          });
+          cloudShadowMesh = new THREE.Mesh(new THREE.SphereGeometry(radius + 0.18, 32, 32), cloudShadowMat);
+          const localLightDir = new THREE.Vector3(-200, 300, 150).normalize();
+          cloudShadowMesh.position.copy(localLightDir).multiplyScalar(-0.24);
+          mesh.add(cloudShadowMesh);
+        }
 
-        // Thin Saturn-style Rings
-        const ring = createRingDisc(32, 46, node.colorHexStr);
-        mesh.add(ring);
+        // Saturn-only Rings
+        if (node.id === 'contact') {
+          const ring = createRingDisc(radius + 4, radius + 18, node.colorHexStr);
+          mesh.add(ring);
+        }
 
         // Icon Sprite inside sphere
         const iconSprite = createIconSprite(node.iconSymbol, node.colorHexStr);
         mesh.add(iconSprite);
 
-        // Pill background label below
+        // Pill background label below (positioned dynamically below the sphere)
         const labelSprite = createLabel(node.label, node.colorHexStr, 28);
-        labelSprite.position.set(0, -48, 0);
+        labelSprite.position.set(0, -(radius + 20), 0);
         mesh.add(labelSprite);
 
         // ClickRaycast Properties
@@ -780,7 +804,7 @@
       emissiveCanvas.height = height;
       const emissiveCtx = emissiveCanvas.getContext('2d');
 
-      const isGasGiant = (planetId === 'projects' || planetId === 'skills');
+      const isGasGiant = (planetId === 'projects' || planetId === 'skills' || planetId === 'contact');
       const noiseGen = SimplexNoise.create();
 
       const baseRgb = hexToRgb(baseColor);
@@ -793,13 +817,14 @@
 
       let stormLat = 0, stormLon = 0, stormU = 0, stormV = 0;
       if (isGasGiant) {
-        stormLat = planetId === 'projects' ? -0.25 : 0.25;
-        stormLon = planetId === 'projects' ? 1.0 : -1.2;
+        // Jupiter's Red Spot, Neptune's Dark Spot, Saturn's White Oval
+        stormLat = planetId === 'projects' ? -0.22 : (planetId === 'skills' ? -0.28 : 0.32);
+        stormLon = planetId === 'projects' ? 1.05 : (planetId === 'skills' ? -1.3 : 0.45);
         stormU = (stormLon + Math.PI) / (2 * Math.PI);
         stormV = Math.acos(stormLat) / Math.PI;
       }
 
-      // Precompute trigonometry tables to avoid 1.5 million slow Math.cos/sin calls
+      // Precompute trigonometry tables to avoid slow Math.cos/sin calls
       const cosTheta = new Float32Array(width);
       const sinTheta = new Float32Array(width);
       for (let col = 0; col < width; col++) {
@@ -818,6 +843,16 @@
           let u = col / width;
           let v = row / height;
 
+          // Apply Coriolis horizontal shear forces to gas giant bands
+          if (isGasGiant) {
+            // Shear speed oscillates with latitude, creating opposing horizontal jets
+            const shearSpeed = Math.sin(y * Math.PI * 6.0) * 0.45;
+            // Shear flow perturbs u coordinate based on y and simplex noise waves
+            const shearWave = fBm(noiseGen, (col/width) * 2.0, y * 3.5, 0.0, 3) * 0.08;
+            u = (u + shearSpeed * 0.1 + shearWave + 10.0) % 1.0;
+          }
+
+          // Storm vortex coordinate swirl mapping
           if (isGasGiant) {
             let du = u - stormU;
             let dv = v - stormV;
@@ -826,7 +861,7 @@
             const dist2D = Math.sqrt(du*du + dv*dv);
             if (dist2D < 0.15) {
               const swirl = (0.15 - dist2D) / 0.15;
-              const twistAngle = swirl * swirl * 3.5;
+              const twistAngle = swirl * swirl * 3.8;
               const newDu = du * Math.cos(twistAngle) - dv * Math.sin(twistAngle);
               const newDv = du * Math.sin(twistAngle) + dv * Math.cos(twistAngle);
               u = (stormU + newDu + 1.0) % 1.0;
@@ -834,24 +869,41 @@
             }
           }
 
-          // Use precomputed values for coordinate projections
+          // Re-project perturbed u, v back to 3D unit sphere coordinates
           const uIdx = Math.floor(u * (width - 1));
           const x = sinPhi * cosTheta[uIdx];
           const z = sinPhi * sinTheta[uIdx];
 
           if (isGasGiant) {
-            const perturb = fBm(noiseGen, x * 1.8, y * 3.0, z * 1.8, 4, 2.0, 0.5) * 0.15;
+            // Gas giants: Jupiter, Saturn, Neptune
+            // Base turbulence using fBm
+            const perturb = fBm(noiseGen, x * 1.5, y * 3.0, z * 1.5, 3, 2.0, 0.5) * 0.12;
             const perturbedY = y + perturb;
+            
+            // Bands: primary and secondary bands
             const bandVal = Math.sin(perturbedY * 18.0) * 0.5 + 0.5;
             const bandVal2 = Math.sin(perturbedY * 38.0) * 0.5 + 0.5;
-            const noiseDetail = fBm(noiseGen, x * 12.0, y * 12.0, z * 12.0, 2) * 0.1;
-            const finalBand = Math.max(0, Math.min(1, bandVal * 0.65 + bandVal2 * 0.25 + noiseDetail + 0.05));
+            const noiseDetail = fBm(noiseGen, x * 10.0, y * 12.0, z * 10.0, 2) * 0.08;
+            const finalBand = Math.max(0, Math.min(1, bandVal * 0.6 + bandVal2 * 0.25 + noiseDetail + 0.08));
 
             let colRgb = lerpColor(baseRgb, accentRgb, finalBand);
-            let bumpVal = Math.round(128 + finalBand * 20);
-            let roughVal = Math.round(76 + (1 - finalBand) * 50);
+            let bumpVal = Math.round(128 + finalBand * 12);
+            let roughVal = Math.round(85 + (1 - finalBand) * 35);
             let emisR = 0, emisG = 0, emisB = 0;
 
+            // Render polar hexagon on Saturn
+            if (planetId === 'contact' && y > 0.83) {
+              const theta = Math.atan2(z, x);
+              const hexPerturb = Math.sin(theta * 6.0) * 0.015;
+              const hexDist = (1.0 - y) + hexPerturb;
+              if (Math.abs(hexDist - 0.065) < 0.014) {
+                // Hexagonal storm wave color (slightly lighter golden green)
+                colRgb = lerpColor(colRgb, { r: 165, g: 150, b: 95 }, 0.55);
+                bumpVal = Math.round(bumpVal * 1.05);
+              }
+            }
+
+            // Great Storm Spot processing
             let du = (col / width) - stormU;
             let dv = (row / height) - stormV;
             if (du > 0.5) du -= 1.0;
@@ -859,19 +911,60 @@
             const dist2D = Math.sqrt(du*du + dv*dv);
             if (dist2D < 0.15) {
               const stormIntensity = (0.15 - dist2D) / 0.15;
-              const stormColor = lerpColor(accentRgb, { r: 255, g: 255, b: 255 }, 0.35);
-              colRgb = lerpColor(colRgb, stormColor, stormIntensity * 0.85);
-              roughVal = Math.round(roughVal * (1 - stormIntensity * 0.3) + 76 * stormIntensity * 0.3);
-              bumpVal = Math.round(bumpVal * (1 - stormIntensity) + 115 * stormIntensity);
+              let stormColor;
+              if (planetId === 'projects') {
+                // Great Red Spot: Swirling deep red-brick colors
+                stormColor = { r: 175, g: 45, b: 35 };
+              } else if (planetId === 'skills') {
+                // Great Dark Spot: Deep dark cobalt
+                stormColor = { r: 12, g: 25, b: 75 };
+              } else {
+                // Saturn White Oval
+                stormColor = { r: 245, g: 238, b: 218 };
+              }
+              colRgb = lerpColor(colRgb, stormColor, stormIntensity * 0.88);
+              roughVal = Math.round(roughVal * (1 - stormIntensity * 0.3) + 70 * stormIntensity * 0.3);
+              bumpVal = Math.round(bumpVal * (1 - stormIntensity) + 120 * stormIntensity);
             }
 
+            // Neptune high-altitude icy cirrus clouds (bright wispy cyan streaks)
+            if (planetId === 'skills') {
+              const cirrusNoise = fBm(noiseGen, x * 4.5, y * 7.5, z * 4.5, 2) * 0.5 + 0.5;
+              if (cirrusNoise > 0.65) {
+                const cirrusStrength = (cirrusNoise - 0.65) / 0.35;
+                // Bright cyan-white methane clouds
+                colRgb = lerpColor(colRgb, { r: 220, g: 248, b: 255 }, cirrusStrength * 0.6);
+                bumpVal = Math.round(bumpVal * (1 - cirrusStrength) + 145 * cirrusStrength);
+              }
+              // Bright companion clouds around Great Dark Spot
+              if (dist2D >= 0.14 && dist2D < 0.22) {
+                const companionNoise = fBm(noiseGen, x * 12.0, y * 12.0, z * 12.0, 2) * 0.5 + 0.5;
+                if (companionNoise > 0.62) {
+                  const compStrength = ((0.22 - dist2D) / 0.08) * (companionNoise - 0.62) / 0.38;
+                  colRgb = lerpColor(colRgb, { r: 200, g: 240, b: 255 }, compStrength * 0.75);
+                  bumpVal = Math.round(bumpVal * (1 - compStrength) + 140 * compStrength);
+                }
+              }
+            }
+
+            // Auroras at gas giant poles
             if (Math.abs(y) > 0.8) {
-              const auroraNoise = fBm(noiseGen, x * 5, y * 2, z * 5, 3) * 0.5 + 0.5;
+              const auroraNoise = fBm(noiseGen, x * 5, y * 2, z * 5, 2) * 0.5 + 0.5;
               const auroraStrength = ((Math.abs(y) - 0.8) / 0.2) * auroraNoise;
               if (auroraStrength > 0.25) {
-                emisR = Math.round(accentRgb.r * auroraStrength * 0.7);
-                emisG = Math.round(accentRgb.g * auroraStrength * 0.7);
-                emisB = Math.round(accentRgb.b * auroraStrength * 0.7);
+                if (planetId === 'projects') {
+                  emisR = Math.round(110 * auroraStrength);
+                  emisG = Math.round(10 * auroraStrength);
+                  emisB = Math.round(255 * auroraStrength); // Violet
+                } else if (planetId === 'skills') {
+                  emisR = Math.round(0 * auroraStrength);
+                  emisG = Math.round(255 * auroraStrength);
+                  emisB = Math.round(180 * auroraStrength); // Cyan/Green
+                } else {
+                  emisR = Math.round(255 * auroraStrength);
+                  emisG = Math.round(180 * auroraStrength);
+                  emisB = Math.round(50 * auroraStrength); // Gold
+                }
               }
             }
 
@@ -896,59 +989,153 @@
             emissiveImgData.data[index+3] = 255;
 
           } else {
-            // Optimized fBm octaves from 6 to 5
-            const heightVal = fBm(noiseGen, x * 2.2, y * 2.2, z * 2.2, 5, 2.0, 0.5);
+            // Rocky planets (Earth, Mars)
             let colRgb, bumpVal, roughVal;
             let emisR = 0, emisG = 0, emisB = 0;
 
-            if (heightVal < 0.04) {
-              const oceanDepth = Math.max(0, Math.min(1, -heightVal * 1.5));
-              colRgb = lerpColor(hexToRgb('#020712'), baseRgb, 0.25 - oceanDepth * 0.15);
-              const waveRipple = fBm(noiseGen, x * 65.0, y * 65.0, z * 65.0, 3) * 5.0;
-              bumpVal = Math.round(120 + waveRipple);
-              roughVal = 30;
-            } else if (heightVal < 0.08) {
-              const sandT = (heightVal - 0.04) / 0.04;
-              const sandColor = { r: 240, g: 215, b: 160 };
-              colRgb = lerpColor(sandColor, lerpColor(baseRgb, accentRgb, 0.2), sandT * 0.4);
-              bumpVal = 132;
-              roughVal = 190;
-            } else {
-              const landT = Math.min(1, (heightVal - 0.08) / 0.8);
-              const baseLand = lerpColor(baseRgb, accentRgb, landT * 0.85);
-              const mountainColor = lerpColor(accentRgb, { r: 255, g: 255, b: 255 }, 0.25);
-              colRgb = lerpColor(baseLand, mountainColor, Math.max(0, (heightVal - 0.4) / 0.6) * 0.5);
-              
-              // Optimized fBm octaves from 4 to 3
-              const mountainDetail = fBm(noiseGen, x * 24.0, y * 24.0, z * 24.0, 3) * 16.0;
-              bumpVal = Math.round(128 + heightVal * 105 + mountainDetail);
-              bumpVal = Math.max(0, Math.min(255, bumpVal));
-              
-              roughVal = 220;
+            if (planetId === 'about') {
+              // Earth texture generator
+              const heightVal = fBm(noiseGen, x * 2.3, y * 2.3, z * 2.3, 4, 2.0, 0.5);
+              if (heightVal < 0.04) {
+                // Ocean
+                const oceanDepth = Math.max(0, Math.min(1, -heightVal * 1.5));
+                colRgb = lerpColor(hexToRgb('#010b21'), baseRgb, 0.28 - oceanDepth * 0.18);
+                const waveRipple = fBm(noiseGen, x * 65.0, y * 65.0, z * 65.0, 2) * 4.0;
+                bumpVal = Math.round(120 + waveRipple);
+                roughVal = 12; // Ocean is highly specular and shiny!
+              } else if (heightVal < 0.06) {
+                // Beach
+                const sandT = (heightVal - 0.04) / 0.02;
+                colRgb = lerpColor({ r: 232, g: 204, b: 144 }, { r: 35, g: 90, b: 45 }, sandT);
+                bumpVal = 130;
+                roughVal = 175;
+              } else if (heightVal < 0.35) {
+                // Land / Biomes (Forests, fields, deserts based on latitude)
+                const landT = (heightVal - 0.06) / 0.29;
+                const latAbs = Math.abs(y);
+                let landColor = { r: 34, g: 95, b: 40 }; // Default Forest Green
 
-              if (Math.abs(y) < 0.72) {
-                // Optimized fBm octaves from 4 to 3
-                const cityNoise = fBm(noiseGen, x * 18.0, y * 18.0, z * 18.0, 3) * 0.5 + 0.5;
-                if (cityNoise > 0.78) {
-                  const cityStrength = (cityNoise - 0.78) / 0.22;
-                  emisR = Math.round(accentRgb.r * cityStrength * 0.95);
-                  emisG = Math.round(accentRgb.g * cityStrength * 0.95);
-                  emisB = Math.round(accentRgb.b * cityStrength * 0.95);
-                  colRgb = lerpColor(colRgb, { r: 255, g: 240, b: 200 }, cityStrength * 0.5);
+                // Climate zones
+                if (latAbs < 0.28) {
+                  // Equatorial Desert (e.g., Sahara)
+                  const desertNoise = fBm(noiseGen, x * 10, y * 10, z * 10, 2) * 0.5 + 0.5;
+                  if (desertNoise > 0.42) {
+                    landColor = lerpColor({ r: 215, g: 172, b: 110 }, { r: 34, g: 95, b: 40 }, (1 - desertNoise) * 0.4);
+                  }
+                } else if (latAbs > 0.58) {
+                  // Polar Tundra (light grey-green-brown)
+                  landColor = { r: 105, g: 115, b: 90 };
+                }
+
+                colRgb = lerpColor(landColor, { r: 85, g: 68, b: 50 }, landT * 0.5);
+                const terrainDetail = fBm(noiseGen, x * 24.0, y * 24.0, z * 24.0, 2) * 14.0;
+                bumpVal = Math.round(128 + heightVal * 95 + terrainDetail);
+                roughVal = 215;
+              } else {
+                // Mountain peaks
+                const mountT = Math.min(1, (heightVal - 0.35) / 0.45);
+                const rockColor = { r: 75, g: 65, b: 58 };
+                const snowColor = { r: 255, g: 255, b: 255 };
+                colRgb = lerpColor(rockColor, snowColor, mountT * 0.85);
+                bumpVal = Math.round(145 + mountT * 60 + fBm(noiseGen, x * 35, y * 35, z * 35, 2) * 12);
+                roughVal = 230;
+              }
+
+              // Earth city lights (golden glow on dark side)
+              if (Math.abs(y) < 0.70) {
+                const cityNoise = fBm(noiseGen, x * 16.0, y * 16.0, z * 16.0, 2) * 0.5 + 0.5;
+                if (cityNoise > 0.76) {
+                  const cityStrength = (cityNoise - 0.76) / 0.24;
+                  emisR = Math.round(255 * cityStrength);
+                  emisG = Math.round(210 * cityStrength);
+                  emisB = Math.round(115 * cityStrength); // Warm golden light
+                  colRgb = lerpColor(colRgb, { r: 255, g: 235, b: 180 }, cityStrength * 0.4);
                 }
               }
-            }
 
-            const iceBoundary = 0.78 + fBm(noiseGen, x * 4, y * 4, z * 4, 3) * 0.06;
-            if (Math.abs(y) > iceBoundary) {
-              const iceT = Math.min(1, (Math.abs(y) - iceBoundary) / 0.12);
-              const iceColor = { r: 245, g: 248, b: 255 };
-              colRgb = lerpColor(colRgb, iceColor, iceT * 0.95);
-              bumpVal = Math.round(bumpVal * (1 - iceT) + 142 * iceT);
-              roughVal = Math.round(roughVal * (1 - iceT) + 85 * iceT);
-              emisR = Math.round(emisR * (1 - iceT));
-              emisG = Math.round(emisG * (1 - iceT));
-              emisB = Math.round(emisB * (1 - iceT));
+              // Polar Ice Caps
+              const iceBoundary = 0.76 + fBm(noiseGen, x * 5, y * 5, z * 5, 2) * 0.05;
+              if (Math.abs(y) > iceBoundary) {
+                const iceT = Math.min(1, (Math.abs(y) - iceBoundary) / 0.12);
+                colRgb = lerpColor(colRgb, { r: 248, g: 250, b: 255 }, iceT * 0.95);
+                bumpVal = Math.round(bumpVal * (1 - iceT) + 140 * iceT);
+                roughVal = Math.round(roughVal * (1 - iceT) + 75 * iceT);
+                emisR = 0; emisG = 0; emisB = 0;
+              }
+
+            } else {
+              // Mars texture generator (volcanoes, canyons, impact craters!)
+              const heightVal = fBm(noiseGen, x * 2.5, y * 2.5, z * 2.5, 4, 2.0, 0.5);
+              
+              // Base dry basalt plains vs highlands color
+              const basaltPlains = { r: 35, g: 15, b: 10 }; // Darker iron-poor basalt
+              const rustHighlands = lerpColor(baseRgb, accentRgb, 0.65); // Warm rust red
+              colRgb = lerpColor(basaltPlains, rustHighlands, heightVal * 0.5 + 0.5);
+              
+              let terrainBump = heightVal * 95;
+              roughVal = 210;
+
+              // 1. Procedural Crater Stamping (for realistic impact topography)
+              const craters = [
+                { x: 0.35, y: 0.15, z: 0.9, r: 0.08, depth: 0.13 },
+                { x: -0.5, y: -0.25, z: 0.7, r: 0.06, depth: 0.11 },
+                { x: 0.1, y: 0.55, z: -0.8, r: 0.11, depth: 0.15 },
+                { x: -0.3, y: -0.65, z: -0.6, r: 0.07, depth: 0.10 },
+                { x: 0.7, y: -0.15, z: -0.5, r: 0.05, depth: 0.08 },
+                { x: -0.2, y: 0.35, z: 0.9, r: 0.09, depth: 0.12 },
+                { x: 0.5, y: -0.45, z: 0.4, r: 0.07, depth: 0.10 }
+              ];
+              
+              for (let i = 0; i < craters.length; i++) {
+                const c = craters[i];
+                const dx = x - c.x; const dy = y - c.y; const dz = z - c.z;
+                const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+                if (dist < c.r) {
+                  const t = dist / c.r;
+                  if (t < 0.85) {
+                    // Bowl depression
+                    const bowlT = t / 0.85;
+                    terrainBump -= c.depth * 105 * (1.0 - bowlT * bowlT);
+                    colRgb = lerpColor(colRgb, { r: 28, g: 10, b: 5 }, 0.42 * (1.0 - bowlT)); // Darker bottom
+                  } else {
+                    // Rim ridge
+                    const rimT = (t - 0.85) / 0.15;
+                    const rimHeight = Math.sin(rimT * Math.PI);
+                    terrainBump += c.depth * 35 * rimHeight;
+                    colRgb = lerpColor(colRgb, { r: 235, g: 140, b: 100 }, 0.3 * rimHeight); // Lighter dust ejecta
+                  }
+                }
+              }
+
+              // 2. Olympus Mons Shield Volcano Dome
+              const vDx = x - 0.3; const vDy = y - 0.15; const vDz = z + 0.85;
+              const vDist = Math.sqrt(vDx*vDx + vDy*vDy + vDz*vDz);
+              if (vDist < 0.22) {
+                const vt = vDist / 0.22;
+                if (vt < 0.15) {
+                  // Volcano caldera depression
+                  terrainBump += 15; // Shield base elevation
+                  terrainBump -= 25 * (1.0 - vt / 0.15); // caldera drop
+                  colRgb = lerpColor(colRgb, { r: 18, g: 6, b: 4 }, 0.58); // dark lava caldera floor
+                } else {
+                  // Volcanic shield slopes
+                  const shieldShape = Math.cos(vt * Math.PI / 2);
+                  terrainBump += 45 * shieldShape;
+                  colRgb = lerpColor(colRgb, { r: 65, g: 25, b: 18 }, 0.35 * (1.0 - vt)); // basalt flow
+                }
+              }
+
+              bumpVal = Math.round(128 + terrainBump);
+              bumpVal = Math.max(0, Math.min(255, bumpVal));
+
+              // Mars polar caps (sharp CO2 ice caps)
+              const iceBoundary = 0.84 + fBm(noiseGen, x * 4, y * 4, z * 4, 2) * 0.05;
+              if (Math.abs(y) > iceBoundary) {
+                const iceT = Math.min(1, (Math.abs(y) - iceBoundary) / 0.10);
+                colRgb = lerpColor(colRgb, { r: 242, g: 248, b: 255 }, iceT * 0.98); // White-cyan CO2 ice
+                bumpVal = Math.round(bumpVal * (1 - iceT) + 135 * iceT);
+                roughVal = Math.round(roughVal * (1 - iceT) + 80 * iceT);
+              }
             }
 
             colorImgData.data[index] = colRgb.r;
@@ -1029,13 +1216,13 @@
 
           let cloudDensity;
           if (isGasGiant) {
-            // Optimized fBm from 4 to 3 octaves
-            const perturb = fBm(noiseGen, x * 2, y * 3, z * 2, 3) * 0.1;
-            cloudDensity = fBm(noiseGen, x * 4.0, (y + perturb) * 6.0, z * 4.0, 3) * 0.5 + 0.5;
+            // High fidelity gas giant cloud band perturb and noise
+            const perturb = fBm(noiseGen, x * 2, y * 3, z * 2, 2) * 0.1;
+            cloudDensity = fBm(noiseGen, x * 4.0, (y + perturb) * 6.0, z * 4.0, 2) * 0.5 + 0.5;
             cloudDensity = Math.max(0, (cloudDensity - 0.42) / 0.58);
           } else {
-            // Optimized fBm from 5 to 4 octaves
-            cloudDensity = fBm(noiseGen, x * 2.8, y * 2.8, z * 2.8, 4) * 0.5 + 0.5;
+            // Detailed rocky planet cloud coverage noise
+            cloudDensity = fBm(noiseGen, x * 2.8, y * 2.8, z * 2.8, 3) * 0.5 + 0.5;
             cloudDensity = Math.max(0, (cloudDensity - 0.48) / 0.52);
           }
 
@@ -1159,11 +1346,13 @@
         ctx.fillRect(x, 0, 1, 1);
       }
 
-      const ringMat = new THREE.MeshBasicMaterial({
+      const ringMat = new THREE.MeshStandardMaterial({
         map: new THREE.CanvasTexture(canvas),
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.82,
+        opacity: 0.88,
+        roughness: 0.65,
+        metalness: 0.25,
         depthWrite: false
       });
       const ring = new THREE.Mesh(geo, ringMat);
@@ -1334,14 +1523,25 @@
     }
 
     function setupInteractionEvents() {
+      let dragStart = { x: 0, y: 0 };
+      const dragThreshold = 5; // pixels
+      let hasDragged = false;
+
       // Manual Orbit controls
       window.addEventListener('mousedown', (e) => {
         isDragging = true;
         prevMouse = { x: e.clientX, y: e.clientY };
+        dragStart = { x: e.clientX, y: e.clientY };
+        hasDragged = false;
       });
 
       window.addEventListener('mousemove', (e) => {
         if (isDragging) {
+          const dx = e.clientX - dragStart.x;
+          const dy = e.clientY - dragStart.y;
+          if (Math.sqrt(dx * dx + dy * dy) > dragThreshold) {
+            hasDragged = true;
+          }
           spherical.theta -= (e.clientX - prevMouse.x) * 0.005;
           spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi - (e.clientY - prevMouse.y) * 0.005));
           prevMouse = { x: e.clientX, y: e.clientY };
@@ -1371,17 +1571,26 @@
         document.body.style.cursor = 'grab';
       });
 
+      let touchStart = { x: 0, y: 0 };
+
       // Touch Drag support
       window.addEventListener('touchstart', (e) => {
         if (e.touches.length !== 1) return;
         isDragging = true;
         const touch = e.touches[0];
         prevMouse = { x: touch.clientX, y: touch.clientY };
+        touchStart = { x: touch.clientX, y: touch.clientY };
+        hasDragged = false;
       }, { passive: true });
 
       window.addEventListener('touchmove', (e) => {
         if (!isDragging) return;
         const touch = e.touches[0];
+        const dx = touch.clientX - touchStart.x;
+        const dy = touch.clientY - touchStart.y;
+        if (Math.sqrt(dx * dx + dy * dy) > dragThreshold) {
+          hasDragged = true;
+        }
         spherical.theta -= (touch.clientX - prevMouse.x) * 0.005;
         spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi - (touch.clientY - prevMouse.y) * 0.005));
         prevMouse = { x: touch.clientX, y: touch.clientY };
@@ -1400,6 +1609,10 @@
 
       // Click detection Raycaster
       window.addEventListener('click', (e) => {
+        if (hasDragged) {
+          hasDragged = false;
+          return;
+        }
         const mouseVec = new THREE.Vector2(
           (e.clientX / window.innerWidth) * 2 - 1,
           -(e.clientY / window.innerHeight) * 2 + 1
@@ -1414,7 +1627,13 @@
             expandSubNodes(clickedMesh.userData.id);
           } else if (clickedMesh.userData.type === 'subnode') {
             if (clickedMesh.userData.isCategory) {
-              expandProjectsCategory(clickedMesh, clickedMesh.userData.categoryId);
+              if (clickedMesh.userData.categoryId === 'hobbies') {
+                expandHobbiesCategory(clickedMesh);
+              } else if (clickedMesh.userData.categoryId === 'socials') {
+                expandSocialsCategory(clickedMesh);
+              } else {
+                expandProjectsCategory(clickedMesh, clickedMesh.userData.categoryId);
+              }
             } else if (clickedMesh.userData.url) {
               window.open(clickedMesh.userData.url, '_blank');
             }
@@ -1447,13 +1666,12 @@
     }
 
     function expandSubNodes(parentId) {
-      if (expandedNodeId === parentId) {
-        collapseActiveNode();
+      if (expandedNodeIds.has(parentId)) {
+        collapseSubNodesByParent(parentId);
         return;
       }
 
-      collapseActiveNode();
-      expandedNodeId = parentId;
+      expandedNodeIds.add(parentId);
 
       const parentNode = nodesList.find(n => n.id === parentId);
       if (!parentNode) return;
@@ -1484,7 +1702,7 @@
         
         // Reuse cached textures from parent category for memory optimization
         const textures = planetTexturesCache[parentId];
-        const isGasGiant = (parentId === 'projects' || parentId === 'skills');
+        const isGasGiant = (parentId === 'projects' || parentId === 'skills' || parentId === 'contact');
         
         const subMat = new THREE.MeshStandardMaterial({
           map: textures ? textures.map : null,
@@ -1524,6 +1742,7 @@
         scene.add(subLine);
 
         subNodesList.push({
+          parentId: parentId, // Track parent ID
           mesh: subMesh,
           line: subLine,
           parentPos: parentPos.clone(),
@@ -1536,8 +1755,37 @@
       });
     }
 
+    function collapseSubNodesByParent(parentId) {
+      subNodesList.forEach((sub) => {
+        if (sub.parentId === parentId) {
+          sub.state = 'collapsing';
+        }
+      });
+
+      // Also collapse grandchild nodes for categories belonging to this parent node
+      if (parentId === 'projects') {
+        collapseGrandchildNodesByCategory('frontend');
+        collapseGrandchildNodesByCategory('cyber');
+      } else if (parentId === 'about') {
+        collapseGrandchildNodesByCategory('hobbies');
+      } else if (parentId === 'contact') {
+        collapseGrandchildNodesByCategory('socials');
+      }
+
+      // Remove only this parent's subnodes from clickableNodes
+      clickableNodes = clickableNodes.filter(c => {
+        if (c.userData.type === 'subnode') {
+          const subObj = subNodesList.find(s => s.mesh.uuid === c.uuid);
+          return !subObj || subObj.parentId !== parentId;
+        }
+        return true;
+      });
+
+      expandedNodeIds.delete(parentId);
+    }
+
     function collapseActiveNode() {
-      if (!expandedNodeId) return;
+      if (expandedNodeIds.size === 0) return;
 
       subNodesList.forEach((sub) => {
         sub.state = 'collapsing';
@@ -1547,7 +1795,7 @@
       collapseGrandchildNodes();
 
       clickableNodes = clickableNodes.filter(c => c.userData.type !== 'subnode');
-      expandedNodeId = null;
+      expandedNodeIds.clear();
     }
 
     function collapseGrandchildNodes() {
@@ -1628,11 +1876,11 @@
         scene.add(gcMesh);
         
         // Atmosphere Fresnel Glow
-        const glowMesh = createAtmosphere(10, '#ff2d78');
+        const glowMesh = createAtmosphere(10, '#ffa500');
         gcMesh.add(glowMesh);
         
         // Label
-        const textSprite = createLabel(gc.label, '#ff2d78', 16); // smaller font for grandchild
+        const textSprite = createLabel(gc.label, '#ffa500', 24); // normal font for grandchild
         textSprite.position.set(0, -18, 0);
         gcMesh.add(textSprite);
         
@@ -1644,7 +1892,183 @@
         };
         
         // Line connector from category planet to grandchild project planet
-        const gcLine = createSubConnector(parentPos, targetPos, 0xff2d78);
+        const gcLine = createSubConnector(parentPos, targetPos, 0xffa500);
+        scene.add(gcLine);
+        
+        grandchildNodesList.push({
+          mesh: gcMesh,
+          line: gcLine,
+          parentPos: parentPos.clone(),
+          targetPos: targetPos.clone(),
+          progress: 0,
+          state: 'expanding',
+          categoryId: categoryId // track which category this grandchild belongs to
+        });
+        
+        clickableNodes.push(gcMesh);
+      });
+    }
+
+    function expandHobbiesCategory(parentSubMesh) {
+      const categoryId = 'hobbies';
+      const alreadyExpanded = grandchildNodesList.some(gc => gc.categoryId === categoryId);
+      
+      // Collapse grandchild nodes of this category
+      collapseGrandchildNodesByCategory(categoryId);
+      
+      if (alreadyExpanded) {
+        return;
+      }
+      
+      const parentPos = parentSubMesh.position.clone();
+      
+      // Calculate direction from parent ABOUT node to Hobbies node to point outward
+      const aboutNode = nodesList.find(n => n.id === 'about');
+      const aboutPos = aboutNode ? aboutNode.mesh.position.clone() : new THREE.Vector3(0, 0, 0);
+      const dir = parentPos.clone().sub(aboutPos).normalize();
+      
+      const temp = Math.abs(dir.y) < 0.99 ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(1, 0, 0);
+      const T = new THREE.Vector3().crossVectors(dir, temp).normalize();
+      const B = new THREE.Vector3().crossVectors(dir, T).normalize();
+      
+      const categoryData = HOBBIES_DATA;
+      const N = categoryData.length;
+      const subSubRadius = 38; // compact circle around the category node
+      const outwardDist = 18; // push slightly outward along the branch direction
+      
+      categoryData.forEach((gc, i) => {
+        const angle = (i / N) * Math.PI * 2;
+        const offset = dir.clone().multiplyScalar(outwardDist)
+          .add(T.clone().multiplyScalar(Math.cos(angle) * subSubRadius))
+          .add(B.clone().multiplyScalar(Math.sin(angle) * subSubRadius));
+          
+        const targetPos = parentPos.clone().add(offset);
+        
+        // Grandchild Sphere (smaller than sub-nodes: radius 10)
+        const gcGeo = new THREE.SphereGeometry(10, 32, 32);
+        const textures = planetTexturesCache['about']; // Earth textures!
+        const gcMat = new THREE.MeshStandardMaterial({
+          map: textures ? textures.map : null,
+          bumpMap: textures ? textures.bumpMap : null,
+          bumpScale: 0.45,
+          roughnessMap: textures ? textures.roughnessMap : null,
+          roughness: 1.0,
+          metalness: 0.05,
+          emissiveMap: textures ? textures.emissiveMap : null,
+          emissive: new THREE.Color(0xffffff),
+          emissiveIntensity: 0.8
+        });
+        const gcMesh = new THREE.Mesh(gcGeo, gcMat);
+        gcMesh.position.copy(parentPos); // starts at parent category planet center
+        gcMesh.scale.set(0.01, 0.01, 0.01);
+        scene.add(gcMesh);
+        
+        // Atmosphere Fresnel Glow (Earth cyan color)
+        const glowMesh = createAtmosphere(10, '#00f5ff');
+        gcMesh.add(glowMesh);
+        
+        // Label
+        const textSprite = createLabel(gc.label, '#00f5ff', 24); // normal font for grandchild
+        textSprite.position.set(0, -18, 0);
+        gcMesh.add(textSprite);
+        
+        gcMesh.userData = {
+          id: gc.id,
+          type: 'grandchild',
+          url: gc.url,
+          categoryId: categoryId
+        };
+        
+        // Line connector from category planet to grandchild project planet
+        const gcLine = createSubConnector(parentPos, targetPos, 0x00f5ff);
+        scene.add(gcLine);
+        
+        grandchildNodesList.push({
+          mesh: gcMesh,
+          line: gcLine,
+          parentPos: parentPos.clone(),
+          targetPos: targetPos.clone(),
+          progress: 0,
+          state: 'expanding',
+          categoryId: categoryId // track which category this grandchild belongs to
+        });
+        
+        clickableNodes.push(gcMesh);
+      });
+    }
+
+    function expandSocialsCategory(parentSubMesh) {
+      const categoryId = 'socials';
+      const alreadyExpanded = grandchildNodesList.some(gc => gc.categoryId === categoryId);
+      
+      // Collapse grandchild nodes of this category
+      collapseGrandchildNodesByCategory(categoryId);
+      
+      if (alreadyExpanded) {
+        return;
+      }
+      
+      const parentPos = parentSubMesh.position.clone();
+      
+      // Calculate direction from parent CONTACT node to Other Socials node to point outward
+      const contactNode = nodesList.find(n => n.id === 'contact');
+      const contactPos = contactNode ? contactNode.mesh.position.clone() : new THREE.Vector3(0, 0, 0);
+      const dir = parentPos.clone().sub(contactPos).normalize();
+      
+      const temp = Math.abs(dir.y) < 0.99 ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(1, 0, 0);
+      const T = new THREE.Vector3().crossVectors(dir, temp).normalize();
+      const B = new THREE.Vector3().crossVectors(dir, T).normalize();
+      
+      const categoryData = SOCIALS_DATA;
+      const N = categoryData.length;
+      const subSubRadius = 38; // compact circle around the category node
+      const outwardDist = 18; // push slightly outward along the branch direction
+      
+      categoryData.forEach((gc, i) => {
+        const angle = (i / N) * Math.PI * 2;
+        const offset = dir.clone().multiplyScalar(outwardDist)
+          .add(T.clone().multiplyScalar(Math.cos(angle) * subSubRadius))
+          .add(B.clone().multiplyScalar(Math.sin(angle) * subSubRadius));
+          
+        const targetPos = parentPos.clone().add(offset);
+        
+        // Grandchild Sphere (smaller than sub-nodes: radius 10)
+        const gcGeo = new THREE.SphereGeometry(10, 32, 32);
+        const textures = planetTexturesCache['contact']; // Saturn textures!
+        const gcMat = new THREE.MeshStandardMaterial({
+          map: textures ? textures.map : null,
+          bumpMap: textures ? textures.bumpMap : null,
+          bumpScale: 0.05,
+          roughnessMap: textures ? textures.roughnessMap : null,
+          roughness: 1.0,
+          metalness: 0.1,
+          emissiveMap: textures ? textures.emissiveMap : null,
+          emissive: new THREE.Color(0xffffff),
+          emissiveIntensity: 0.8
+        });
+        const gcMesh = new THREE.Mesh(gcGeo, gcMat);
+        gcMesh.position.copy(parentPos);
+        gcMesh.scale.set(0.01, 0.01, 0.01);
+        scene.add(gcMesh);
+        
+        // Atmosphere Fresnel Glow (Saturn yellow color)
+        const glowMesh = createAtmosphere(10, '#ffe600');
+        gcMesh.add(glowMesh);
+        
+        // Label
+        const textSprite = createLabel(gc.label, '#ffe600', 24); // normal font for grandchild (size 24)
+        textSprite.position.set(0, -18, 0);
+        gcMesh.add(textSprite);
+        
+        gcMesh.userData = {
+          id: gc.id,
+          type: 'grandchild',
+          url: gc.url,
+          categoryId: categoryId
+        };
+        
+        // Line connector from category planet to grandchild project planet
+        const gcLine = createSubConnector(parentPos, targetPos, 0xffe600);
         scene.add(gcLine);
         
         grandchildNodesList.push({
