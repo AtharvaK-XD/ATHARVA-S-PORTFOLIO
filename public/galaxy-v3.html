@@ -171,7 +171,7 @@
         accentColor: '#124016',
         iconSymbol: '>_',
         subNodeData: [
-          { id: 'about-1', label: 'CS Student' },
+          { id: 'about-1', label: 'Freelancer', isCategory: true, categoryId: 'freelancer' },
           { id: 'about-2', label: 'Hobbies', isCategory: true, categoryId: 'hobbies' },
           { id: 'about-3', label: 'Dev + Hacker' }
         ]
@@ -268,6 +268,11 @@
       { id: 'hobby-gaming', label: 'Gaming' },
       { id: 'hobby-sports', label: 'Sports' },
       { id: 'hobby-travelling', label: 'Travelling' }
+    ];
+
+    const FREELANCER_DATA = [
+      { id: 'freelancer-fiverr', label: 'Fiverr', url: 'https://www.fiverr.com' },
+      { id: 'freelancer-internshala', label: 'Internshala', url: 'https://internshala.com' }
     ];
 
     const SOCIALS_DATA = [
@@ -1681,6 +1686,8 @@
             if (clickedMesh.userData.isCategory) {
               if (clickedMesh.userData.categoryId === 'hobbies') {
                 expandHobbiesCategory(clickedMesh);
+              } else if (clickedMesh.userData.categoryId === 'freelancer') {
+                expandFreelancerCategory(clickedMesh);
               } else if (clickedMesh.userData.categoryId === 'socials') {
                 expandSocialsCategory(clickedMesh);
               } else {
@@ -1820,6 +1827,7 @@
         collapseGrandchildNodesByCategory('cyber');
       } else if (parentId === 'about') {
         collapseGrandchildNodesByCategory('hobbies');
+        collapseGrandchildNodesByCategory('freelancer');
       } else if (parentId === 'contact') {
         collapseGrandchildNodesByCategory('socials');
       }
@@ -1984,6 +1992,94 @@
       const B = new THREE.Vector3().crossVectors(dir, T).normalize();
       
       const categoryData = HOBBIES_DATA;
+      const N = categoryData.length;
+      const subSubRadius = 38; // compact circle around the category node
+      const outwardDist = 18; // push slightly outward along the branch direction
+      
+      categoryData.forEach((gc, i) => {
+        const angle = (i / N) * Math.PI * 2;
+        const offset = dir.clone().multiplyScalar(outwardDist)
+          .add(T.clone().multiplyScalar(Math.cos(angle) * subSubRadius))
+          .add(B.clone().multiplyScalar(Math.sin(angle) * subSubRadius));
+          
+        const targetPos = parentPos.clone().add(offset);
+        
+        // Grandchild Sphere (smaller than sub-nodes: radius 10)
+        const gcGeo = new THREE.SphereGeometry(10, 32, 32);
+        const textures = planetTexturesCache['about']; // Earth textures!
+        const gcMat = new THREE.MeshStandardMaterial({
+          map: textures ? textures.map : null,
+          bumpMap: textures ? textures.bumpMap : null,
+          bumpScale: 0.45,
+          roughnessMap: textures ? textures.roughnessMap : null,
+          roughness: 1.0,
+          metalness: 0.05,
+          emissiveMap: textures ? textures.emissiveMap : null,
+          emissive: new THREE.Color(0xffffff),
+          emissiveIntensity: 0.8
+        });
+        const gcMesh = new THREE.Mesh(gcGeo, gcMat);
+        gcMesh.position.copy(parentPos); // starts at parent category planet center
+        gcMesh.scale.set(0.01, 0.01, 0.01);
+        scene.add(gcMesh);
+        
+        // Atmosphere Fresnel Glow (Earth cyan color)
+        const glowMesh = createAtmosphere(10, '#00f5ff');
+        gcMesh.add(glowMesh);
+        
+        // Label
+        const textSprite = createLabel(gc.label, '#00f5ff', 24); // normal font for grandchild
+        textSprite.position.set(0, -18, 0);
+        gcMesh.add(textSprite);
+        
+        gcMesh.userData = {
+          id: gc.id,
+          type: 'grandchild',
+          url: gc.url,
+          categoryId: categoryId
+        };
+        
+        // Line connector from category planet to grandchild project planet
+        const gcLine = createSubConnector(parentPos, targetPos, 0x00f5ff);
+        scene.add(gcLine);
+        
+        grandchildNodesList.push({
+          mesh: gcMesh,
+          line: gcLine,
+          parentPos: parentPos.clone(),
+          targetPos: targetPos.clone(),
+          progress: 0,
+          state: 'expanding',
+          categoryId: categoryId // track which category this grandchild belongs to
+        });
+        
+        clickableNodes.push(gcMesh);
+      });
+    }
+
+    function expandFreelancerCategory(parentSubMesh) {
+      const categoryId = 'freelancer';
+      const alreadyExpanded = grandchildNodesList.some(gc => gc.categoryId === categoryId);
+      
+      // Collapse grandchild nodes of this category
+      collapseGrandchildNodesByCategory(categoryId);
+      
+      if (alreadyExpanded) {
+        return;
+      }
+      
+      const parentPos = parentSubMesh.position.clone();
+      
+      // Calculate direction from parent ABOUT node to Freelancer node to point outward
+      const aboutNode = nodesList.find(n => n.id === 'about');
+      const aboutPos = aboutNode ? aboutNode.mesh.position.clone() : new THREE.Vector3(0, 0, 0);
+      const dir = parentPos.clone().sub(aboutPos).normalize();
+      
+      const temp = Math.abs(dir.y) < 0.99 ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(1, 0, 0);
+      const T = new THREE.Vector3().crossVectors(dir, temp).normalize();
+      const B = new THREE.Vector3().crossVectors(dir, T).normalize();
+      
+      const categoryData = FREELANCER_DATA;
       const N = categoryData.length;
       const subSubRadius = 38; // compact circle around the category node
       const outwardDist = 18; // push slightly outward along the branch direction
