@@ -53,37 +53,46 @@ export default function About({ mode, text, contact }) {
             </div>
             <p className="panel-title">Contact / Identity Panel</p>
             
-            <a className="info-link text-sm" href={`mailto:${email}`}>
-              Email: {email}
-            </a>
-            
-            <a 
-              className="info-link text-sm" 
-              href={github} 
-              target="_blank" 
-              rel="noopener noreferrer"
-            >
-              GitHub: AtharvaK-XD
-            </a>
-            
-            <a 
-              className="info-link text-sm" 
-              href={linkedin} 
-              target="_blank" 
-              rel="noopener noreferrer"
-            >
-              LinkedIn: atharva-kulkarni-a16a5a3b9
-            </a>
-            {tryhackme && (
+            <div className="flex flex-col gap-2 mt-3">
               <a 
-                className="info-link text-sm" 
-                href={tryhackme} 
+                className="btn btn-secondary text-sm w-full" 
+                href={`mailto:${email}`}
+                style={{ fontFamily: isHacker ? 'var(--mono)' : 'inherit' }}
+              >
+                Email Me
+              </a>
+              
+              <a 
+                className="btn btn-secondary text-sm w-full" 
+                href={github} 
                 target="_blank" 
                 rel="noopener noreferrer"
+                style={{ fontFamily: isHacker ? 'var(--mono)' : 'inherit' }}
               >
-                TryHackMe: kulkarniatharva529
+                GitHub
               </a>
-            )}
+              
+              <a 
+                className="btn btn-secondary text-sm w-full" 
+                href={linkedin} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ fontFamily: isHacker ? 'var(--mono)' : 'inherit' }}
+              >
+                LinkedIn
+              </a>
+              {tryhackme && (
+                <a 
+                  className="btn btn-secondary text-sm w-full" 
+                  href={tryhackme} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  style={{ fontFamily: isHacker ? 'var(--mono)' : 'inherit' }}
+                >
+                  TryHackMe
+                </a>
+              )}
+            </div>
           </aside>
         </div>
       </div>
