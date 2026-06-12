@@ -30,7 +30,12 @@ export default function App() {
     initializeMode
   } = useMode();
 
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('hasLoadedBefore') !== 'true';
+    }
+    return true;
+  });
   const [loaderFadeOut, setLoaderFadeOut] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [showSplash, setShowSplash] = useState(true);
@@ -62,6 +67,7 @@ export default function App() {
         // Wait 900ms (400ms hold + 500ms transition), then unmount loader
         setTimeout(() => {
           setInitialLoading(false);
+          sessionStorage.setItem('hasLoadedBefore', 'true');
         }, 900);
       }
     }, intervalTime);

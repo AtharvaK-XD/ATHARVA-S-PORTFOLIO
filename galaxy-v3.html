@@ -565,11 +565,6 @@
 
         // Assign dynamic, realistic radii representing scale differences of solar system counterparts
         let radius = 28;
-        if (node.id === 'about') radius = 24;      // Earth
-        else if (node.id === 'projects') radius = 33; // Jupiter
-        else if (node.id === 'blogs') radius = 21;    // Mars
-        else if (node.id === 'skills') radius = 26;   // Neptune
-        else if (node.id === 'contact') radius = 30;  // Saturn
 
         // Realistic dark planet procedural globe
         const sphereGeo = new THREE.SphereGeometry(radius, 32, 32);
